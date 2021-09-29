@@ -16,6 +16,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -25,6 +26,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -34,6 +36,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -43,6 +46,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -52,6 +56,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -71,6 +76,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -80,6 +86,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -93,8 +100,6 @@ resources:
     private_key: ((docs-ref-pipeline-repo-key.private_key))
     uri: ((docs-ref-pipeline-repo-uri))
     branch: master
-    submodules: all
-    depth: 1
 # code_snippet resources-pipeline-configurations end yaml
 
 # code_snippet resources-pipeline-triggers start yaml
