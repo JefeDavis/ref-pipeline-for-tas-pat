@@ -1,0 +1,2155 @@
+resources:
+
+- name: one-time-trigger
+  type: time
+  source:
+    interval: 999999h
+
+- name: daily-trigger
+  type: time
+  source:
+    interval: 24h
+
+- name: installation
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id_cp))
+    secret_access_key: ((s3_secret_access_key_cp))
+    region_name: ((s3_region_name))
+    bucket: ((s3_installation_bucket))
+    versioned_file: ((foundation))/installation.zip
+    skip_ssl_verification: true
+
+- name: state
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id_cp))
+    secret_access_key: ((s3_secret_access_key_cp))
+    region_name: ((s3_region_name))
+    bucket: ((s3_installation_bucket))
+    versioned_file: ((foundation))/state/state.yml
+    skip_ssl_verification: true
+
+- name: platform-automation-tasks
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    secret_access_key: ((s3_secret_access_key))
+    region_name: ((s3_region_name))
+    bucket: ((s3_pivnet_products_bucket))
+    regexp: .*tasks-(.*).zip
+
+- name: platform-automation-image
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    secret_access_key: ((s3_secret_access_key))
+    region_name: ((s3_region_name))
+    bucket: ((s3_pivnet_products_bucket))
+    regexp: .*image-(.*).tgz
+
+- name: configuration
+  type: git
+  source:
+    uri: ((automation_git_repo))
+    branch: master
+
+prepare-tasks-with-secrets: &prepare-tasks-with-secrets
+  image: platform-automation-image
+  file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
+  input_mapping:
+    tasks: platform-automation-tasks
+    config: configuration
+    vars: configuration
+  params:
+    CONFIG_PATHS: config/foundations/config config/foundations/((foundation))/config
+    VARS_PATHS: vars/foundations/((foundation))/vars vars/foundations/vars/global.yml
+  output_mapping:
+    tasks: platform-automation-tasks
+
+jobs:
+- name: test-platform-automation
+  serial: true
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: test-interpolate
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/test-interpolate.yml
+      params:
+        CONFIG_FILE: foundations/config/download-tkgi.yml
+        SKIP_MISSING: true
+      input_mapping:
+        config: configuration
+    - task: test
+      file: platform-automation-tasks/tasks/test.yml
+      image: platform-automation-image
+
+- name: install-opsman
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: one-time-trigger
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+    - get: state
+  
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  
+  - task: download-opsman-image
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-opsman.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: opsman-image
+
+  - task: create-vm
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/create-vm.yml
+    input_mapping:
+      image: opsman-image
+      config: configuration
+      vars: configuration
+    params:
+      OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
+      STATE_FILE: state.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/director.yml vars/foundations/((foundation))/vars/params.yml
+    ensure: &put-state
+      do:
+      - put: state
+        params:
+          file: generated-state/state.yml
+ 
+  - task: configure-authentication
+    image: platform-automation-image
+    ### SANDBOX  DOESN'T USE SAML CHANGE TASK TO configure-authentication.yml for non saml foundations
+    file: platform-automation-tasks/tasks/configure-saml-authentication.yml
+    attempts: 10
+    input_mapping:
+      env: configuration
+      config: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      AUTH_CONFIG_FILE: foundations/((foundation))/config/auth.yml
+
+  - task: configure-opsman
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/configure-opsman.yml
+    input_mapping:
+      env: configuration
+      config: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/director.yml vars/foundations/((foundation))/vars/params.yml
+ 
+  - task: configure-director
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/configure-director.yml
+    input_mapping:
+      config: configuration
+      env: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      DIRECTOR_CONFIG_FILE: foundations/((foundation))/config/director.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/director.yml vars/foundations/vars/global.yml
+
+  - task: apply-director-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-director-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+  
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+      ENV_FILE: foundations/((foundation))/config/env.yml
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: export-installation
+  serial_groups: [ install ]
+  serial: true
+  plan:
+  - in_parallel:
+    - get: state
+      passed: [ install-opsman ]
+    - get: daily-trigger
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: revert-staged-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/revert-staged-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: upgrade-opsman
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: installation
+      passed: [ export-installation ]
+    - get: configuration
+    - get: state
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-opsman-image
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-opsman.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: opsman-image
+  - task: upgrade-opsman
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upgrade-opsman.yml
+    input_mapping:
+      image: opsman-image
+      config: configuration
+      env: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
+      STATE_FILE: state.yml
+      INSTALLATION_FILE: installation*.zip
+      VARS_FILES: vars/foundations/((foundation))/vars/director.yml vars/foundations/((foundation))/vars/params.yml
+    ensure: *put-state
+  - task: configure-director
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/configure-director.yml
+    input_mapping:
+      config: configuration
+      env: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      DIRECTOR_CONFIG_FILE: foundations/((foundation))/config/director.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/director.yml vars/foundations/vars/global.yml
+  - task: apply-director-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-director-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: download-upload-and-stage-tkgi
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+
+  - task: download-tkgi
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-tkgi.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml  vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: tkgi-product
+      downloaded-stemcell: tkgi-stemcell
+
+  - task: upload-and-stage-tkgi
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+    input_mapping:
+      product: tkgi-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-tkgi-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: tkgi-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-tas
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-tas
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-tas.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: tas-product
+      downloaded-stemcell: tas-stemcell
+
+  - task: upload-tas-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: tas-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-tas-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: tas-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-tas
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: tas-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-fim
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-fim
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-fim.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: fim-product
+      downloaded-stemcell: fim-stemcell
+
+  - task: upload-fim-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: fim-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-fim-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: fim-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-fim
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: fim-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-pav-mirror
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-pav-mirror
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-pav-mirror.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: pav-mirror-product
+      downloaded-stemcell: pav-mirror-stemcell
+
+  - task: upload-pav-mirror-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: pav-mirror-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-pav-mirror-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: pav-mirror-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-pav-mirror
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: pav-mirror-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-pav
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-pav
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-pav.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: pav-product
+      downloaded-stemcell: pav-stemcell
+
+  - task: upload-pav-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: pav-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-pav-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: pav-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-pav
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: pav-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-compliance-scanner
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-compliance-scanner
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-compliance-scanner.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: compliance-scanner-product
+      downloaded-stemcell: compliance-scanner-stemcell
+
+  - task: upload-compliance-scanner-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: compliance-scanner-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-compliance-scanner-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: compliance-scanner-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-compliance-scanner
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: compliance-scanner-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-healthwatch
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-healthwatch
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-healthwatch.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: healthwatch-product
+      downloaded-stemcell: healthwatch-stemcell
+
+  - task: upload-healthwatch-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: healthwatch-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-healthwatch-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: healthwatch-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-healthwatch
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: healthwatch-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-hw-exp-tas
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-hw-exp-tas
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-hw-exp-tas.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: hw-exp-tas-product
+      downloaded-stemcell: hw-exp-tas-stemcell
+
+  - task: upload-hw-exp-tas-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: hw-exp-tas-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-hw-exp-tas-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: hw-exp-tas-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-hw-exp-tas
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: hw-exp-tas-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-aws-service-broker
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-aws-sb
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-aws-sb.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: aws-sb-product
+      downloaded-stemcell: aws-sb-stemcell
+
+  - task: upload-aws-sb-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: aws-sb-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-aws-sb-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: aws-sb-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-aws-sb
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: aws-sb-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-credhub-sb
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-credhub-sb
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-credhub-sb.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: credhub-sb-product
+      downloaded-stemcell: credhub-sb-stemcell
+
+  - task: upload-credhub-sb-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: credhub-sb-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-credhub-sb-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: credhub-sb-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-credhub-sb
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: credhub-sb-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-event-alerts
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-event-alerts
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-event-alerts.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: event-alerts-product
+      downloaded-stemcell: event-alerts-stemcell
+
+  - task: upload-event-alerts-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: event-alerts-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-event-alerts-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: event-alerts-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-event-alerts
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: event-alerts-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-metric-store
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-metric-store
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-metric-store.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: metric-store-product
+      downloaded-stemcell: metric-store-stemcell
+
+  - task: upload-metric-store-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: metric-store-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-metric-store-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: metric-store-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-metric-store
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: metric-store-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-metrics
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-metrics
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-metrics.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: metrics-product
+      downloaded-stemcell: metrics-stemcell
+
+  - task: upload-metrics-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: metrics-product
+      env: configuration
+      config: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      CONFIG_FILE: foundations/((foundation))/vars/metrics.yml
+
+  - task: upload-metrics-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: metrics-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-metrics
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: metrics-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-mysql
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-mysql
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-mysql.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: mysql-product
+      downloaded-stemcell: mysql-stemcell
+
+  - task: upload-mysql-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: mysql-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-mysql-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: mysql-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-mysql
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: mysql-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-rabbitmq
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-rabbitmq
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-rabbitmq.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: rabbitmq-product
+      downloaded-stemcell: rabbitmq-stemcell
+
+  - task: upload-rabbitmq-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: rabbitmq-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-rabbitmq-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: rabbitmq-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-rabbitmq
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: rabbitmq-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-redis
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-redis
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-redis.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: redis-product
+      downloaded-stemcell: redis-stemcell
+
+  - task: upload-redis-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: redis-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-redis-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: redis-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-redis
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: redis-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-splunk
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-splunk
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-splunk.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: splunk-product
+      downloaded-stemcell: splunk-stemcell
+
+  - task: upload-splunk-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: splunk-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-splunk-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: splunk-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-splunk
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: splunk-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-spring-cs
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-spring-cs
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-spring-cs.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: spring-cs-product
+      downloaded-stemcell: spring-cs-stemcell
+
+  - task: upload-spring-cs-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: spring-cs-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-spring-cs-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: spring-cs-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-spring-cs
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: spring-cs-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: download-upload-and-stage-sso
+  serial: true
+  serial_groups: [ products ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: false
+      passed: [ "upgrade-opsman" ]
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-sso
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/config/download-sso.yml
+      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: sso-product
+      downloaded-stemcell: sso-stemcell
+
+  - task: upload-sso-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: sso-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: upload-sso-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: sso-stemcell
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+ 
+  - task: upload-and-stage-sso
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-product.yml
+    input_mapping:
+      product: sso-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+- name: configure-tas
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-tas
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-tas
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/tas.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/tas.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-tkgi
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-tkgi
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-tkgi
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/tkgi.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/tkgi.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-healthwatch
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-healthwatch
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-healthwatch
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/healthwatch.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/healthwatch.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-hw-exp-tas
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-hw-exp-tas
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-hw-exp-tas
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/hw-exp-tas.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/hw-exp-tas.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-event-alerts
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-event-alerts
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-event-alerts
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/event-alerts.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/event-alerts.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-metrics
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-metrics
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-metrics
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/metrics.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/metrics.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-mysql
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-mysql
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-mysql
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/mysql.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/mysql.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-rabbitmq
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-rabbitmq
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-rabbitmq
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/rabbitmq.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/rabbitmq.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-redis
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-redis
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-redis
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/redis.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/redis.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-splunk
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-splunk
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-splunk
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/splunk.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/splunk.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-sso
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-sso
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-sso
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/sso.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/sso.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-fim
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-fim
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-fim
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/fim.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/fim.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-credhub-sb
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-credhub-sb
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-credhub-sb
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/credhub-sb.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/credhub-sb.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-metric-store
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-metric-store
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-metric-store
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/metric-store.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/metric-store.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-pav
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-pav
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-pav
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/pav.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/pav.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-pav-mirror
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-pav-mirror
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-pav-mirror
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/pav-mirror.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/pav-mirror.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-spring-cs
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-spring-cs
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-spring-cs
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/spring-cs.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/spring-cs.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-compliance-scanner
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-compliance-scanner
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-compliance-scanner
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/compliance-scanner.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/compliance-scanner.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: configure-aws-service-broker
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-aws-service-broker
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-aws-sb
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/aws-sb.yml
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/aws-sb.yml
+          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/((foundation))/vars/params.yml
+
+- name: expiring-certificates
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: daily-trigger
+        trigger: true
+      - get: platform-automation-image
+        params:
+          unpack: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+      - get: state
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: expiring-certificates
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/expiring-certificates.yml
+      input_mapping:
+        env: configuration
+      params:
+        ENV_FILE: foundations/((foundation))/config/env.yml
+        EXPIRES_WITHIN: 6m
+
+- name: apply-product-changes
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      passed:
+      - configure-event-alerts
+      - configure-tas
+      - configure-tkgi
+      - configure-rabbitmq
+      - configure-hw-exp-tas
+      - configure-healthwatch
+      - configure-metrics
+      - configure-mysql
+      - configure-redis
+      - configure-splunk
+      - configure-sso
+      - configure-fim
+      - configure-credhub-sb
+      - configure-metric-store
+      - configure-pav
+      - configure-pav-mirror
+      - configure-spring-cs
+      - configure-compliance-scanner
+      - configure-aws-service-broker
+      trigger: false  ##CHANGE BACK TO TRUE###
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+
+  - task: pre-deploy-check
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/pre-deploy-check.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: apply-product-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+
+  - task: check-pending-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/check-pending-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      ALLOW_PENDING_CHANGES: true
+
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/((foundation))/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: delete-installation
+  serial: true
+  serial_groups: [install]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+      - get: state
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+
+    - task: delete-installation
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/delete-installation.yml
+      input_mapping:
+        env: configuration
+      params:
+        ENV_FILE: foundations/((foundation))/config/env.yml
+
+    - task: delete-vm
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/delete-vm.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
+        STATE_FILE: state.yml
+        VARS_FILES: vars/foundations/((foundation))/vars/params.yml vars/foundations/vars/global.yml
+      ensure:
+        do:
+        - put: state
+          params:
+            file: generated-state/state.yml
+
