@@ -122,6 +122,26 @@ resources:
     secret_access_key: ((s3_secret_access_key))
     regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
+- name: harbor-registry-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[harbor-container-registry,(.*)\]harbor-container-registry-.*.pivotal
+
+- name: harbor-registry-stemcell
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+
 - name: tas-product
   type: s3
   source:
@@ -397,6 +417,42 @@ jobs:
       - put: compliance-scanner-stemcell
         params:
           file: compliance-scanner-stemcell/*.tgz
+# code_snippet download-product-usage end
+
+# code_snippet download-product-usage start yaml
+- name: fetch-harbor-registry
+  plan:
+  - in_parallel:
+    - get: daily
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-image
+    <<: *prepare-image
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-harbor-registry-product-and-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    params:
+      CONFIG_FILE: download-product-pivnet/download-harbor-registry.yml
+      VARS_FILES: vars/foundations/vars/global.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    output_mapping: {downloaded-stemcell: harbor-registry-stemcell}
+  - in_parallel:
+      - put: harbor-registry-product
+        params:
+          file: downloaded-product/*.pivotal
+      - put: harbor-registry-stemcell
+        params:
+          file: harbor-registry-stemcell/*.tgz
 # code_snippet download-product-usage end
 
 # code_snippet download-product-usage start yaml
