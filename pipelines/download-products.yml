@@ -143,6 +143,16 @@ resources:
     regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 # code_snippet resources-pipeline-products end yaml
 
+- name: nsx-t-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[vmware-nsx-t,(.*)\]VMware-NSX-T-.*.pivotal
+
 # code_snippet resources-pipeline-platform-automation start yaml
 - name: platform-automation-pivnet
   type: pivnet
@@ -458,6 +468,36 @@ jobs:
         - put: tas-stemcell
           params:
             file: tas-stemcell/*.tgz
+
+- name: fetch-nsx-t
+  plan:
+    - in_parallel:
+      - get: daily
+        trigger: true
+      - get: platform-automation-image
+        params:
+          unpack: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-image
+      <<: *prepare-image
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: download-nsx-t-product
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      params:
+        CONFIG_FILE: download-product-pivnet/download-nsx-t.yml
+        VARS_FILES: vars/foundations/vars/global.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+    - in_parallel:
+      - put: nsx-t-product
+        params:
+          file: downloaded-product/*.pivotal
 
 - name: fetch-platform-automation
   # We use the pivnet resource to bootstrap the pipeline,
