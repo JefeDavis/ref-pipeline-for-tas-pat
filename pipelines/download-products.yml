@@ -20,7 +20,7 @@ resources:
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
-    regexp: products/\[ops-manager,(.*)\]ops-manager-vsphere.*.yml
+    regexp: products/\[ops-manager,(.*)\]ops-manager-vsphere.*.ova
 
 - name: tkgi-product
   type: s3
