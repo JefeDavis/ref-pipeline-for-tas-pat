@@ -97,8 +97,8 @@ resources:
 - name: configuration
   type: git
   source:
-    private_key: ((docs-ref-pipeline-repo-key.private_key))
-    uri: ((docs-ref-pipeline-repo-uri))
+    private_key: ((pipeline-repo-key.private_key))
+    uri: ((pipeline-repo-uri))
     branch: master
 # code_snippet resources-pipeline-configurations end yaml
 

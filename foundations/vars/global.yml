@@ -2,4 +2,4 @@ s3_access_key_id: minio
 s3_endpoint: "https://minio.uadsop.af.mil:9000"
 s3_pivnet_products_bucket: "platform-automation"
 s3_region_name: ""
-docs-ref-pipeline-repo-uri: git@git.uadsop.af.mil:/repos/platform-automation.git
+pipeline-repo-uri: git@git.uadsop.af.mil:/repos/platform-automation.git
