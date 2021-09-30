@@ -203,7 +203,7 @@ jobs:
   plan:
     - in_parallel:
       - get: daily
-        trigger: true
+        trigger: false
       - get: platform-automation-image
         params:
           unpack: true
