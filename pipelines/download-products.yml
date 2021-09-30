@@ -197,6 +197,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -206,6 +207,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -216,6 +218,7 @@ resources:
   source:
     access_key_id: ((s3_access_key_id))
     bucket: ((s3_pivnet_products_bucket))
+    endpoint: ((s3_endpoint))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
     regexp: products/\[pivotal_single_sign-on_service,(.*)\]Pivotal_Single_Sign-On_Service_.*.pivotal
@@ -224,6 +227,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -233,6 +237,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -242,6 +247,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -251,6 +257,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -260,6 +267,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -269,6 +277,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -278,6 +287,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -287,6 +297,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -296,6 +307,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -305,6 +317,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -314,6 +327,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -323,6 +337,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -332,6 +347,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key_id))
+    endpoint: ((s3_endpoint))
     bucket: ((s3_pivnet_products_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
@@ -410,6 +426,8 @@ prepare-image: &prepare-image
 # code_snippet resources-pipeline-jobs start yaml
 jobs:
 - name: fetch-opsman
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -441,6 +459,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-antivirus
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -477,6 +497,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-antivirus-mirror
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -513,6 +535,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-file-integrety-monitoring
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -549,6 +573,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-compliance-scanner
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -585,6 +611,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-harbor-registry
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -621,6 +649,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-healthwatch
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -657,6 +687,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-mysql
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -693,6 +725,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-sso
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -729,6 +763,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-redis
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -765,6 +801,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-rabbitmq
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -801,6 +839,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-credhub-sb
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -837,6 +877,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-metrics
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -873,6 +915,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-metric-store
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -909,6 +953,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-spring-cloud-services
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -945,6 +991,8 @@ jobs:
 
 # code_snippet download-product-usage start yaml
 - name: fetch-tkgi
+  serial: true
+  serial_groups: [ products ]
   plan:
   - in_parallel:
     - get: daily
@@ -980,6 +1028,8 @@ jobs:
 # code_snippet download-product-usage end
 
 - name: fetch-tas
+  serial: true
+  serial_groups: [ products ]
   plan:
     - in_parallel:
       - get: daily
@@ -1014,6 +1064,8 @@ jobs:
             file: tas-stemcell/*.tgz
 
 - name: fetch-nsx-t
+  serial: true
+  serial_groups: [ products ]
   plan:
     - in_parallel:
       - get: daily
