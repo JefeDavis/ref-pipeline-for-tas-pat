@@ -193,6 +193,150 @@ resources:
     secret_access_key: ((s3_secret_access_key))
     regexp: products/\[vmware-nsx-t,(.*)\]VMware-NSX-T-.*.pivotal
 
+- name: mysql-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[pivotal-mysql,(.*)\]pivotal-mysql-.*.pivotal
+
+- name: mysql-stemcell
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+        
+- name: sso-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[pivotal_single_sign-on_service,(.*)\]Pivotal_Single_Sign-On_Service_.*.pivotal
+
+- name: sso-stemcell
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+        
+- name: redis-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[p-redis,(.*)\]p-redis-.*.pivotal
+
+- name: redis-stemcell
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+
+- name: rabbitmq-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[p-rabbitmq,(.*)\]p-rabbitmq-.*.pivotal
+
+- name: rabbitmq-stemcell
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+        
+- name: credhub-sb-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[credhub-service-broker,(.*)\]credhub-service-broker-.*.pivotal
+
+- name: credhub-sb-stemcell
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+
+- name: metrics-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[apm,(.*)\]app-metrics-.*.pivotal
+
+- name: metrics-stemcell
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+
+- name: metric-store-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[p-metric-store,(.*)\]metric-store-.*.pivotal
+
+- name: metric-store-stemcell
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+
+- name: spring-cloud-services-product
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: products/\[p-spring-cloud-services,(.*)\]p_spring-cloud-services-.*.pivotal
+
+- name: spring-cloud-services-stemcell
+  type: s3
+  source:
+    access_key_id: ((s3_access_key_id))
+    bucket: ((s3_pivnet_products_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_secret_access_key))
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+
 # code_snippet resources-pipeline-platform-automation start yaml
 - name: platform-automation-pivnet
   type: pivnet
@@ -509,6 +653,294 @@ jobs:
       - put: healthwatch-stemcell
         params:
           file: healthwatch-stemcell/*.tgz
+# code_snippet download-product-usage end
+
+# code_snippet download-product-usage start yaml
+- name: fetch-mysql
+  plan:
+  - in_parallel:
+    - get: daily
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-image
+    <<: *prepare-image
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-mysql-product-and-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    params:
+      CONFIG_FILE: download-product-pivnet/download-mysql.yml
+      VARS_FILES: vars/foundations/vars/global.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    output_mapping: {downloaded-stemcell: mysql-stemcell}
+  - in_parallel:
+      - put: mysql-product
+        params:
+          file: downloaded-product/*.pivotal
+      - put: mysql-stemcell
+        params:
+          file: mysql-stemcell/*.tgz
+# code_snippet download-product-usage end
+
+# code_snippet download-product-usage start yaml
+- name: fetch-sso
+  plan:
+  - in_parallel:
+    - get: daily
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-image
+    <<: *prepare-image
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-sso-product-and-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    params:
+      CONFIG_FILE: download-product-pivnet/download-sso.yml
+      VARS_FILES: vars/foundations/vars/global.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    output_mapping: {downloaded-stemcell: sso-stemcell}
+  - in_parallel:
+      - put: sso-product
+        params:
+          file: downloaded-product/*.pivotal
+      - put: sso-stemcell
+        params:
+          file: sso-stemcell/*.tgz
+# code_snippet download-product-usage end
+
+# code_snippet download-product-usage start yaml
+- name: fetch-redis
+  plan:
+  - in_parallel:
+    - get: daily
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-image
+    <<: *prepare-image
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-redis-product-and-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    params:
+      CONFIG_FILE: download-product-pivnet/download-redis.yml
+      VARS_FILES: vars/foundations/vars/global.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    output_mapping: {downloaded-stemcell: redis-stemcell}
+  - in_parallel:
+      - put: redis-product
+        params:
+          file: downloaded-product/*.pivotal
+      - put: redis-stemcell
+        params:
+          file: redis-stemcell/*.tgz
+# code_snippet download-product-usage end
+
+# code_snippet download-product-usage start yaml
+- name: fetch-rabbitmq
+  plan:
+  - in_parallel:
+    - get: daily
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-image
+    <<: *prepare-image
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-rabbitmq-product-and-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    params:
+      CONFIG_FILE: download-product-pivnet/download-rabbitmq.yml
+      VARS_FILES: vars/foundations/vars/global.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    output_mapping: {downloaded-stemcell: rabbitmq-stemcell}
+  - in_parallel:
+      - put: rabbitmq-product
+        params:
+          file: downloaded-product/*.pivotal
+      - put: rabbitmq-stemcell
+        params:
+          file: rabbitmq-stemcell/*.tgz
+# code_snippet download-product-usage end
+
+# code_snippet download-product-usage start yaml
+- name: fetch-credhub-sb
+  plan:
+  - in_parallel:
+    - get: daily
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-image
+    <<: *prepare-image
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-credhub-sb-product-and-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    params:
+      CONFIG_FILE: download-product-pivnet/download-credhub-sb.yml
+      VARS_FILES: vars/foundations/vars/global.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    output_mapping: {downloaded-stemcell: credhub-sb-stemcell}
+  - in_parallel:
+      - put: credhub-sb-product
+        params:
+          file: downloaded-product/*.pivotal
+      - put: credhub-sb-stemcell
+        params:
+          file: credhub-sb-stemcell/*.tgz
+# code_snippet download-product-usage end
+
+# code_snippet download-product-usage start yaml
+- name: fetch-metrics
+  plan:
+  - in_parallel:
+    - get: daily
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-image
+    <<: *prepare-image
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-metrics-product-and-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    params:
+      CONFIG_FILE: download-product-pivnet/download-metrics.yml
+      VARS_FILES: vars/foundations/vars/global.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    output_mapping: {downloaded-stemcell: metrics-stemcell}
+  - in_parallel:
+      - put: metrics-product
+        params:
+          file: downloaded-product/*.pivotal
+      - put: metrics-stemcell
+        params:
+          file: metrics-stemcell/*.tgz
+# code_snippet download-product-usage end
+
+# code_snippet download-product-usage start yaml
+- name: fetch-metric-store
+  plan:
+  - in_parallel:
+    - get: daily
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-image
+    <<: *prepare-image
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-metric-store-product-and-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    params:
+      CONFIG_FILE: download-product-pivnet/download-metric-store.yml
+      VARS_FILES: vars/foundations/vars/global.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    output_mapping: {downloaded-stemcell: metric-store-stemcell}
+  - in_parallel:
+      - put: metric-store-product
+        params:
+          file: downloaded-product/*.pivotal
+      - put: metric-store-stemcell
+        params:
+          file: metric-store-stemcell/*.tgz
+# code_snippet download-product-usage end
+
+# code_snippet download-product-usage start yaml
+- name: fetch-spring-cloud-services
+  plan:
+  - in_parallel:
+    - get: daily
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-image
+    <<: *prepare-image
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: download-spring-cloud-services-product-and-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    params:
+      CONFIG_FILE: download-product-pivnet/download-spring-cloud-services.yml
+      VARS_FILES: vars/foundations/vars/global.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    output_mapping: {downloaded-stemcell: spring-cloud-services-stemcell}
+  - in_parallel:
+      - put: spring-cloud-services-product
+        params:
+          file: downloaded-product/*.pivotal
+      - put: spring-cloud-services-stemcell
+        params:
+          file: spring-cloud-services-stemcell/*.tgz
 # code_snippet download-product-usage end
 
 # code_snippet download-product-usage start yaml
