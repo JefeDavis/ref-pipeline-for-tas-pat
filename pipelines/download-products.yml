@@ -156,8 +156,10 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-opsman.yml
+      VARS_FILES: vars/foundations/vars/global.yml
     input_mapping:
       config: configuration
+      vars: configuration
   - in_parallel:
     - put: opsman-product
       params:
@@ -220,8 +222,10 @@ jobs:
       file: platform-automation-tasks/tasks/download-product.yml
       params:
         CONFIG_FILE: download-product-pivnet/download-tas.yml
+        VARS_FILES: vars/foundations/vars/global.yml
       input_mapping:
         config: configuration
+        vars: configuration
       output_mapping: {downloaded-stemcell: tas-stemcell}
     - in_parallel:
         - put: tas-product
