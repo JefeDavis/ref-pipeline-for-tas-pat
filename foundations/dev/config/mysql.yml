@@ -1,0 +1,164 @@
+---
+product-name: pivotal-mysql
+product-properties:
+  .properties.allow_lower_case_table_names_via_config_param:
+    value: false
+  .properties.audit_logging_enabled:
+    value: false
+  .properties.backups_selector:
+    selected_option: s3
+    value: S3 Backups
+  .properties.backups_selector.s3.access_key_id:
+    value:
+      secret: ((s3_access_key.username))
+  .properties.backups_selector.s3.bucket_name:
+    value: ((s3_mysql_backup_bucket))
+  .properties.backups_selector.s3.cron_schedule:
+    value: 0 */8 * * *
+  .properties.backups_selector.s3.endpoint_url:
+    value: ((s3_endpoint))
+  .properties.backups_selector.s3.force_path_style:
+    value: false
+  .properties.backups_selector.s3.secret_access_key:
+    value:
+      secret: ((s3_access_key.password))
+  .properties.binlog_space_limit_enabled:
+    value: false
+  .properties.canary_instances:
+    value: 0
+  .properties.deprecated_bindings_string:
+    value: X
+  .properties.enable_lower_case_table_names:
+    value: false
+  .properties.enable_read_only_admin:
+    value: false
+  .properties.enable_secure_binding_credentials:
+    value: false
+  .properties.enable_tls_selector:
+    selected_option: disabled
+    value: disabled
+  .properties.global_recipient_email:
+    value: ((alerts_email))
+  .properties.global_service_instance_limit:
+    value: 200
+  .properties.local_infile:
+    value: false
+  .properties.mysql_metrics_frequency:
+    value: 30
+  .properties.off_platform_access_selector:
+    selected_option: disabled
+    value: disabled
+  .properties.plan1_selector:
+    selected_option: single_node
+    value: single_node
+  .properties.plan1_selector.single_node.access_dropdown:
+    value: enable
+  .properties.plan1_selector.single_node.az_multi_select:
+    value:
+    - ((availability_zone))1
+    - ((availability_zone))2
+    - ((availability_zone))3
+  .properties.plan1_selector.single_node.description:
+    value: This plan provides a small dedicated MySQL instance.
+  .properties.plan1_selector.single_node.name:
+    value: db-small
+  .properties.plan1_selector.single_node.paid_plan:
+    value: false
+  .properties.plan2_selector:
+    selected_option: leader_follower
+    value: leader_follower
+  .properties.plan2_selector.leader_follower.access_dropdown:
+    value: enable
+  .properties.plan2_selector.leader_follower.az_multi_select:
+    value:
+    - ((availability_zone))1
+    - ((availability_zone))2
+    - ((availability_zone))3
+  .properties.plan2_selector.leader_follower.description:
+    value: This plan provides a medium dedicated MySQL instance.
+  .properties.plan2_selector.leader_follower.name:
+    value: db-medium
+  .properties.plan2_selector.leader_follower.paid_plan:
+    value: false
+  .properties.plan3_selector:
+    selected_option: inactive
+    value: Inactive
+  .properties.plan4_selector:
+    selected_option: inactive
+    value: Inactive
+  .properties.plan5_selector:
+    selected_option: inactive
+    value: Inactive
+  .properties.plan6_selector:
+    selected_option: inactive
+    value: Inactive
+  .properties.plan7_selector:
+    selected_option: inactive
+    value: Inactive
+  .properties.plan8_selector:
+    selected_option: inactive
+    value: Inactive
+  .properties.plan9_selector:
+    selected_option: inactive
+    value: Inactive
+  .properties.request_timeout:
+    value: 120
+  .properties.simultaneous_upgrades:
+    value: 1
+  .properties.userstat:
+    value: false
+  .properties.wait_timeout:
+    value: 28800
+network-properties:
+  network:
+    name: ((networks_services))
+  other_availability_zones:
+  - name: ((availability_zone))1
+  - name: ((availability_zone))2
+  - name: ((availability_zone))3
+  service_network:
+    name: ((networks_services))
+  singleton_availability_zone:
+    name: ((availability_zone))1
+resource-config:
+  dedicated-mysql-broker:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    swap_as_percent_of_memory_size: automatic
+errand-config:
+  delete-all-service-instances-and-deregister-broker:
+    pre-delete-state: true
+  recreate-all-service-instances:
+    post-deploy-state: false
+  register-broker:
+    post-deploy-state: true
+  smoke-tests:
+    post-deploy-state: true
+  upgrade-all-service-instances:
+    post-deploy-state: true
+  validate-before-upgrade-instances:
+    post-deploy-state: true
+syslog-properties:
+  address: null
+  custom_rsyslog_configuration: null
+  enabled: false
+  forward_debug_logs: false
+  permitted_peer: null
+  port: null
+  queue_size: null
+  ssl_ca_certificate: null
+  tls_enabled: false
+  transport_protocol: tcp
+

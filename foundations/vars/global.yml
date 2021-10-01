@@ -13,3 +13,4 @@ vsphere_datacenter: USAFE-DSOP
 vsphere_datastore: vsanDatastore
 domain_controllers: 132.25.70.11,132.25.70.12
 tier0_router: 1eabf927-6ba6-47a0-9d7c-b0c69b67ff1a
+alerts_email: robert.mclean.14.ctr@us.af.mil
