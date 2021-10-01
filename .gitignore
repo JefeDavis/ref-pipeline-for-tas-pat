@@ -1,2 +1,3 @@
 foundations/vars/secret-vars.yml
 pipelines/pipeline-ref.yml
+**.swp
