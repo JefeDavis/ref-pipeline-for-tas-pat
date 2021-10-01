@@ -1,0 +1,136 @@
+product-name: p-healthwatch2
+product-properties:
+  .grafana.enable_login_form:
+    value: true
+  .grafana.enable_mysql:
+    value: false
+  .grafana.enable_rabbitmq:
+    value: false
+  .grafana.ssl_certificates:
+    value: {}
+  .properties.dashboard_discovery:
+    selected_option: dynamic
+    value: dynamic
+  .properties.enable_telemetry:
+    value: false
+  .properties.grafana_authentication:
+    selected_option: basic
+    value: basic
+  .properties.grafana_proxy:
+    selected_option: disabled
+    value: disabled
+  .properties.opsman_skip_ssl_validation:
+    value: false
+  .properties.pks_cluster_discovery:
+    selected_option: disabled
+    value: disabled
+  .properties.smtp:
+    selected_option: disabled
+    value: disabled
+  .tsdb.canary_exporter_port:
+    value: 9115
+  .tsdb.disk_chunk_size:
+    value: 6144
+  .tsdb.memory_chunk_size:
+    value: 4096
+  .tsdb.scrape_interval:
+    value: 15s
+network-properties:
+  network:
+    name: ((networks.services))
+  other_availability_zones:
+  - name: ((availability_zone))1
+  - name: ((availability_zone))2
+  - name: ((availability_zone))3
+  singleton_availability_zone:
+    name: (((availability_zone))1
+resource-config:
+  grafana:
+    max_in_flight: 5
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    persistent_disk:
+      size_mb: automatic
+    swap_as_percent_of_memory_size: automatic
+  pxc:
+    max_in_flight: 5
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    persistent_disk:
+      size_mb: automatic
+    swap_as_percent_of_memory_size: automatic
+  pxc-proxy:
+    max_in_flight: 5
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    persistent_disk:
+      size_mb: automatic
+    swap_as_percent_of_memory_size: automatic
+  tsdb:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    persistent_disk:
+      size_mb: automatic
+    swap_as_percent_of_memory_size: automatic
+errand-config:
+  smoke-test:
+    post-deploy-state: true
+  update-admin-password:
+    post-deploy-state: true
+syslog-properties:
+  address: null
+  custom_rsyslog_configuration: null
+  enabled: false
+  forward_debug_logs: false
+  permitted_peer: null
+  port: null
+  queue_size: null
+  ssl_ca_certificate: null
+  tls_enabled: false
+  transport_protocol: tcp
+
