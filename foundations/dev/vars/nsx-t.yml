@@ -1,0 +1,4 @@
+container_ip_blocks: a9c0625f-d758-4af6-b287-267ab8b073f5
+external_ip_pools: 86c932bd-6e1e-436e-9017-ed74726c879a
+overlay_tz: e7a8681d-16d8-45b5-b7c8-0549b02d8b07
+tier0_router: 1eabf927-6ba6-47a0-9d7c-b0c69b67ff1a

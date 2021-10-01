@@ -1,0 +1,57 @@
+product-name: VMware-NSX-T
+product-properties:
+  .properties.container_ip_blocks:
+    value:
+    - cidr: null
+      name: ((container_ip_blocks))
+  .properties.default_running_asg_use_ip_set:
+    value: false
+  .properties.enable_inventory:
+    value: true
+  .properties.enable_snat:
+    value: true
+  .properties.exit_on_disconnection:
+    selected_option: enable
+    value: enable
+  .properties.external_ip_pools:
+    value:
+    - allocation_ranges: null
+      cidr: null
+      name: ((external_ip_pools))
+  .properties.foundation_name:
+    value: ((foundation))
+  .properties.log_firewall_rules:
+    selected_option: disable
+    value: disable
+  .properties.master_timeout:
+    value: 18
+  .properties.ncp_debug_log:
+    value: false
+  .properties.nsx_api_ca_cert:
+    value: ((nsxt_cert.certificate))
+  .properties.nsx_api_managers:
+    value: ((nsxt_manager_fqdn))
+  .properties.nsx_auth:
+    selected_option: simple
+    value: simple
+  .properties.nsx_auth.simple.nsx_api_password:
+    value:
+      secret: ((nsxt_api_user.password))
+  .properties.nsx_auth.simple.nsx_api_user:
+    value: ((nsxt_api_user.username))
+  .properties.nsx_node_agent_debug_log:
+    value: false
+  .properties.overlay_tz:
+    value: ((overlay_tz))
+  .properties.remove_ovs_ports_timeout:
+    value: 1800
+  .properties.snat_rule_logging:
+    selected_option: none
+    value: none
+  .properties.subnet_prefix:
+    value: 24
+  .properties.tier0_router:
+    value: ((tier0_router))
+  .properties.wait_for_security_policy_sync:
+    value: false
+

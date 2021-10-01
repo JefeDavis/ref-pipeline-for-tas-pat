@@ -464,6 +464,7 @@ jobs:
     params:
       ENV_FILE: foundations/config/env.yml
   # code_snippet stage-product-usage end
+
 - name: download-upload-and-stage-healthwatch
   serial: true
   serial_groups: [ products ]
@@ -507,6 +508,44 @@ jobs:
       input_mapping:
         env: configuration
         stemcell: healthwatch-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+
+- name: download-upload-and-stage-nsx-t
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: [ "upgrade-opsman" ]
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: download-nsx-t
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/download-nsx-t.yml
+        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: nsx-t-product
+        downloaded-stemcell: nsx-t-stemcell
+    - task: upload-and-stage-nsx-t
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: nsx-t-product
+        env: configuration
       params:
         ENV_FILE: foundations/config/env.yml
 
@@ -574,6 +613,7 @@ jobs:
         VARS_FILES: |
           vars/foundations/((foundation))/vars/tas.yml
           vars/foundations/((foundation))/vars/director.yml
+
 - name: configure-healthwatch
   serial: true
   serial_groups: [ install ]
@@ -604,6 +644,39 @@ jobs:
         VARS_FILES: |
           vars/foundations/((foundation))/vars/healthwatch.yml
           vars/foundations/((foundation))/vars/director.yml
+
+- name: configure-nsx-t
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-nsx-t
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-nsx-t
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/nsx-t.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/nsx-t.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
 - name: apply-product-changes
   serial: true
   serial_groups: [ install ]
@@ -664,6 +737,7 @@ jobs:
   - put: installation
     params:
       file: installation/((foundation))-installation*.zip
+
 - name: run-tas-smoketest-errand
   serial: true
   plan:
@@ -675,6 +749,7 @@ jobs:
       - configure-pks
       - configure-tas
       - configure-healthwatch
+      - configure-nsx-t
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -696,7 +771,7 @@ jobs:
       ENV_FILE: foundations/config/env.yml
       OPSMAN_SSH_PRIVATE_KEY: ((ops_manager_ssh_private_key))
   # code_snippet run-bosh-errand-usage end
-# code_snippet send-telemetry-usage end
+
 - name: expiring-certificates
   serial: true
   serial_groups: [ install ]
@@ -724,6 +799,7 @@ jobs:
         ENV_FILE: foundations/config/env.yml
         EXPIRES_WITHIN: 6m
     # code_snippet expiring-certificates-usage end
+
 - name: delete-installation
   serial: true
   serial_groups: [install]
