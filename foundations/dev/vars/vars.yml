@@ -1,0 +1,6 @@
+---
+foundation: dev
+s3_foundation_state_bucket: platform-automation/dev/state/
+ops_manager_fqdn: opsman.dev.uadsop.af.mil
+availability_zone: DEV-AZ
+

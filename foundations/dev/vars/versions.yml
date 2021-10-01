@@ -1,0 +1,10 @@
+---
+opsman: 2.10.16
+tas: 2.11.4
+tkgi: 1.11.2
+antivirus: 2.3.2
+antivirus-mirror: 2.3.2
+mysql: 2.10.4
+compliance-scanner: 1.2.52
+fim: 2.1.5
+nsx-t: 3.1.2
