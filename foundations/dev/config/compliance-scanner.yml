@@ -1,0 +1,84 @@
+---
+product-name: p-compliance-scanner
+product-properties:
+  .properties.benchmarks:
+    value:
+    - Base
+    - CIS-Level-1
+    - CIS-Level-2
+    - STIG
+    - TKGI-CIS-Master
+    - TKGI-CIS-Worker
+    - TKGI-STIG-Master
+    - TKGI-STIG-Worker
+  .properties.bucket_selector:
+    selected_option: none
+    value: none
+  .properties.cni_dir:
+    value: /var/vcap/jobs/flanneld
+  .properties.cpu_limit:
+    value: 50
+  .properties.detection_timeout:
+    value: 1
+  .properties.enforce_cpu_limit:
+    selected_option: disabled
+    value: disabled
+  .properties.login_banner:
+    value: |
+      Unauthorized use is strictly prohibited. All access and activity is subject to logging and monitoring.
+  .properties.ntp_server:
+    value: ((domain_controllers))
+  .properties.scan_report_formats:
+    value:
+    - csv
+    - xml
+    - html
+  .properties.scanner_timeout:
+    value: 1200
+  .properties.scheduled_scan_enabled:
+    selected_option: disabled
+    value: disabled
+  .properties.syslog_host:
+    value: 192.0.2.1
+  .properties.syslog_port:
+    value: 514
+network-properties:
+  network:
+    name: ((networks_services))
+  other_availability_zones:
+  - name: ((availability_zone))1
+  - name: ((availability_zone))2
+  - name: ((availability_zone))3
+  singleton_availability_zone:
+    name: ((availability_zone))1
+resource-config:
+  oscap_store:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    swap_as_percent_of_memory_size: automatic
+errand-config:
+  scan_results:
+    post-deploy-state: false
+syslog-properties:
+  address: null
+  custom_rsyslog_configuration: null
+  enabled: false
+  forward_debug_logs: false
+  permitted_peer: null
+  port: null
+  queue_size: null
+  ssl_ca_certificate: null
+  tls_enabled: false
+  transport_protocol: tcp
