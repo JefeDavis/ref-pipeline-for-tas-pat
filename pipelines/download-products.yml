@@ -1,16 +1,12 @@
 # The following line helps maintain current documentation at http://docs.pivotal.io.
-# code_snippet put-resources-pipeline start yaml
 
-# code_snippet resources-pipeline-resource-types start yaml
 resource_types:
 - name: pivnet
   type: docker-image
   source:
     repository: pivotalcf/pivnet-resource
     tag: latest
-# code_snippet resources-pipeline-resource-types end yaml
 
-# code_snippet resources-pipeline-products start yaml
 resources:
 - name: opsman-product
   type: s3
@@ -181,7 +177,6 @@ resources:
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
     regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
-# code_snippet resources-pipeline-products end yaml
 
 - name: nsx-t-product
   type: s3
@@ -353,7 +348,6 @@ resources:
     secret_access_key: ((s3_secret_access_key))
     regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
-# code_snippet resources-pipeline-platform-automation start yaml
 - name: platform-automation-pivnet
   type: pivnet
   source:
@@ -381,25 +375,19 @@ resources:
     region_name: ((s3_region_name))
     secret_access_key: ((s3_secret_access_key))
     regexp: platform-automation-image-(.*).tgz
-# code_snippet resources-pipeline-platform-automation end yaml
 
-# code_snippet resources-pipeline-configurations start yaml
 - name: configuration
   type: git
   source:
     private_key: ((pipeline-repo-key.private_key))
     uri: ((pipeline-repo-uri))
     branch: master
-# code_snippet resources-pipeline-configurations end yaml
 
-# code_snippet resources-pipeline-triggers start yaml
 - name: daily
   type: time
   source:
     interval: 24h
-# code_snippet resources-pipeline-triggers end yaml
 
-# code_snippet resources-pipeline-prepare-tasks-with-secrets start yaml
 # This task is used in multiple jobs
 # The yaml anchor "*prepare-tasks-with-secrets" is used in its place
 prepare-tasks-with-secrets: &prepare-tasks-with-secrets
@@ -421,9 +409,7 @@ prepare-image: &prepare-image
   params:
     CA_CERTS: ((wcf))
 
-# code_snippet resources-pipeline-prepare-tasks-with-secrets end yaml
 
-# code_snippet resources-pipeline-jobs start yaml
 jobs:
 - name: fetch-opsman
   serial: true
@@ -457,7 +443,6 @@ jobs:
       params:
         file: downloaded-product/*
 
-# code_snippet download-product-usage start yaml
 - name: fetch-antivirus
   serial: true
   serial_groups: [ products ]
@@ -493,9 +478,7 @@ jobs:
       - put: antivirus-stemcell
         params:
           file: antivirus-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-antivirus-mirror
   serial: true
   serial_groups: [ products ]
@@ -531,9 +514,7 @@ jobs:
       - put: antivirus-mirror-stemcell
         params:
           file: antivirus-mirror-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-file-integrety-monitoring
   serial: true
   serial_groups: [ products ]
@@ -569,9 +550,7 @@ jobs:
       - put: file-integrety-monitoring-stemcell
         params:
           file: file-integrety-monitoring-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-compliance-scanner
   serial: true
   serial_groups: [ products ]
@@ -607,9 +586,7 @@ jobs:
       - put: compliance-scanner-stemcell
         params:
           file: compliance-scanner-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-harbor-registry
   serial: true
   serial_groups: [ products ]
@@ -645,9 +622,7 @@ jobs:
       - put: harbor-registry-stemcell
         params:
           file: harbor-registry-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-healthwatch
   serial: true
   serial_groups: [ products ]
@@ -683,9 +658,7 @@ jobs:
       - put: healthwatch-stemcell
         params:
           file: healthwatch-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-mysql
   serial: true
   serial_groups: [ products ]
@@ -721,9 +694,7 @@ jobs:
       - put: mysql-stemcell
         params:
           file: mysql-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-sso
   serial: true
   serial_groups: [ products ]
@@ -759,9 +730,7 @@ jobs:
       - put: sso-stemcell
         params:
           file: sso-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-redis
   serial: true
   serial_groups: [ products ]
@@ -797,9 +766,7 @@ jobs:
       - put: redis-stemcell
         params:
           file: redis-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-rabbitmq
   serial: true
   serial_groups: [ products ]
@@ -835,9 +802,7 @@ jobs:
       - put: rabbitmq-stemcell
         params:
           file: rabbitmq-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-credhub-sb
   serial: true
   serial_groups: [ products ]
@@ -873,9 +838,7 @@ jobs:
       - put: credhub-sb-stemcell
         params:
           file: credhub-sb-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-metrics
   serial: true
   serial_groups: [ products ]
@@ -911,9 +874,7 @@ jobs:
       - put: metrics-stemcell
         params:
           file: metrics-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-metric-store
   serial: true
   serial_groups: [ products ]
@@ -949,9 +910,7 @@ jobs:
       - put: metric-store-stemcell
         params:
           file: metric-store-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-spring-cloud-services
   serial: true
   serial_groups: [ products ]
@@ -987,9 +946,7 @@ jobs:
       - put: spring-cloud-services-stemcell
         params:
           file: spring-cloud-services-stemcell/*.tgz
-# code_snippet download-product-usage end
 
-# code_snippet download-product-usage start yaml
 - name: fetch-tkgi
   serial: true
   serial_groups: [ products ]
@@ -1025,7 +982,6 @@ jobs:
       - put: tkgi-stemcell
         params:
           file: tkgi-stemcell/*.tgz
-# code_snippet download-product-usage end
 
 - name: fetch-tas
   serial: true
@@ -1108,6 +1064,4 @@ jobs:
     - put: platform-automation-image
       params:
         file: platform-automation-pivnet/*image*.tgz
-# code_snippet resources-pipeline-jobs end yaml
-# code_snippet put-resources-pipeline end
 # The previous line helps maintain current documentation at http://docs.pivotal.io.

@@ -1,7 +1,5 @@
 # The following line helps maintain current documentation at http://docs.pivotal.io.
-# code_snippet reference-pipeline start yaml
 
-# code_snippet reference-resources-s3 start yaml
 resources:
 - name: platform-automation-tasks
   type: s3
@@ -21,7 +19,6 @@ resources:
     bucket: ((s3_pivnet_products_bucket))
     regexp: .*image-(.*).tgz
 
-# code_snippet export-installation-resource-usage start yaml
 - name: installation
   type: s3
   source:
@@ -30,9 +27,7 @@ resources:
     region_name: ((s3_region_name))
     bucket: ((s3_installation_bucket))
     regexp: ((foundation))-installation-(.*).zip
-# code_snippet export-installation-resource-usage end
 
-# code_snippet resources-configurations start yaml
 # VM state and foundation configuration
 - name: state
   type: s3
@@ -52,9 +47,7 @@ resources:
     private_key: ((pipeline-repo-key.private_key))
     uri: ((pipeline-repo-uri))
     branch: master
-# code_snippet resources-configurations end yaml
 
-# code_snippet resources-triggers start yaml
 # triggers used to have jobs do something in a timely manner
 - name: one-time-trigger
   type: time
@@ -65,9 +58,7 @@ resources:
   type: time
   source:
     interval: 24h
-# code_snippet resources-triggers end yaml
 
-# code_snippet prepare-tasks-with-secrets-usage start yaml
 # This task is used in multiple jobs
 # The yaml anchor "*prepare-tasks-with-secrets" is used in its place
 prepare-tasks-with-secrets: &prepare-tasks-with-secrets
@@ -82,15 +73,11 @@ prepare-tasks-with-secrets: &prepare-tasks-with-secrets
     VARS_PATHS: vars/foundations/((foundation))/vars
   output_mapping:
     tasks: platform-automation-tasks
-# code_snippet prepare-tasks-with-secrets-usage end yaml
-# code_snippet prepare-image-usage start yaml
 prepare-image: &prepare-image
   image: platform-automation-image
   file: platform-automation-tasks/tasks/prepare-image.yml
   params:
     CA_CERTS: ((wcf))
-# code_snippet prepare-image-usage end yaml
-# code_snippet reference-jobs start yaml
 jobs:
 - name: test-platform-automation
   serial: true
@@ -103,7 +90,6 @@ jobs:
         params:
           unpack: true
       - get: configuration
-    # code_snippet test-interpolate-usage start yaml
     - task: test-interpolate
       image: platform-automation-image
       file: platform-automation-tasks/tasks/test-interpolate.yml
@@ -112,12 +98,9 @@ jobs:
         SKIP_MISSING: true
       input_mapping:
         config: configuration
-    # code_snippet test-interpolate-usage end
-    # code_snippet test-usage start yaml
     - task: test
       file: platform-automation-tasks/tasks/test.yml
       image: platform-automation-image
-  # code_snippet test-usage end
 
 - name: install-opsman
   serial: true
@@ -150,7 +133,6 @@ jobs:
       SOURCE: s3
     output_mapping:
       downloaded-product: opsman-image
-  # code_snippet create-vm-usage start yaml
   - task: create-vm
     image: platform-automation-image
     file: platform-automation-tasks/tasks/create-vm.yml
@@ -167,8 +149,6 @@ jobs:
       - put: state
         params:
           file: generated-state/state-((foundation)).yml
-  # code_snippet create-vm-usage end
-  # code_snippet configure-authentication-usage start yaml
   - task: configure-authentication
     image: platform-automation-image
     file: platform-automation-tasks/tasks/configure-authentication.yml
@@ -179,8 +159,6 @@ jobs:
     params:
       ENV_FILE: foundations/config/env.yml
       AUTH_CONFIG_FILE: foundations/config/auth.yml
-  # code_snippet configure-authentication-usage end
-  # code_snippet configure-opsman-usage start yaml
   - task: configure-opsman
     image: platform-automation-image
     file: platform-automation-tasks/tasks/configure-opsman.yml
@@ -192,8 +170,6 @@ jobs:
       ENV_FILE: foundations/config/env.yml
       OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
       VARS_FILES: vars/foundations/((foundation))/vars/director.yml
-  # code_snippet configure-opsman-usage end
-  # code_snippet configure-director-usage start yaml
   - task: configure-director
     image: platform-automation-image
     file: platform-automation-tasks/tasks/configure-director.yml
@@ -206,8 +182,6 @@ jobs:
       DIRECTOR_CONFIG_FILE: foundations/((foundation))/config/director.yml
       VARS_FILES: |
         vars/foundations/((foundation))/vars/director.yml
-  # code_snippet configure-director-usage end
-  # code_snippet apply-director-changes-usage start yaml
   - task: apply-director-changes
     image: platform-automation-image
     file: platform-automation-tasks/tasks/apply-director-changes.yml
@@ -215,7 +189,6 @@ jobs:
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-  # code_snippet apply-director-changes-usage end
   - task: export-installation
     image: platform-automation-image
     file: platform-automation-tasks/tasks/export-installation.yml
@@ -248,7 +221,6 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
-  # code_snippet revert-staged-changes-usage start yaml
   - task: revert-staged-changes
     image: platform-automation-image
     file: platform-automation-tasks/tasks/revert-staged-changes.yml
@@ -256,8 +228,6 @@ jobs:
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-  # code_snippet revert-staged-changes-usage end
-  # code_snippet export-installation-usage start yaml
   - task: export-installation
     image: platform-automation-image
     file: platform-automation-tasks/tasks/export-installation.yml
@@ -266,7 +236,6 @@ jobs:
     params:
       ENV_FILE: foundations/config/env.yml
       INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
-  # code_snippet export-installation-usage end
   - put: installation
     params:
       file: installation/((foundation))-installation*.zip
@@ -303,7 +272,6 @@ jobs:
       SOURCE: s3
     output_mapping:
       downloaded-product: opsman-image
-  # code_snippet upgrade-opsman-usage start yaml
   - task: upgrade-opsman
     image: platform-automation-image
     file: platform-automation-tasks/tasks/upgrade-opsman.yml
@@ -319,7 +287,6 @@ jobs:
       INSTALLATION_FILE: ((foundation))-installation*.zip
       VARS_FILES: vars/foundations/((foundation))/vars/director.yml
     ensure: *put-state
-  # code_snippet upgrade-opsman-usage end
   - task: configure-director
     image: platform-automation-image
     file: platform-automation-tasks/tasks/configure-director.yml
@@ -369,7 +336,6 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
-  # code_snippet download-product-usage-s3 start yaml
   - task: download-tkgi
     image: platform-automation-image
     file: platform-automation-tasks/tasks/download-product.yml
@@ -377,14 +343,12 @@ jobs:
       config: configuration
       vars: configuration
     params:
-      CONFIG_FILE: foundations/((foundation))/config/download-tkgi.yml
+      CONFIG_FILE: foundations/((foundation))/products/download-tkgi.yml
       VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
       SOURCE: s3
     output_mapping:
       downloaded-product: tkgi-product
       downloaded-stemcell: tkgi-stemcell
-  # code_snippet download-product-usage-s3 end
-  # code_snippet upload-and-stage-product-usage start yaml
   - task: upload-and-stage-tkgi
     image: platform-automation-image
     file: platform-automation-tasks/tasks/upload-and-stage-product.yml
@@ -393,8 +357,6 @@ jobs:
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-  # code_snippet upload-and-stage-product-usage end
-  # code_snippet upload-stemcell-usage start yaml
   - task: upload-tkgi-stemcell
     image: platform-automation-image
     file: platform-automation-tasks/tasks/upload-stemcell.yml
@@ -403,7 +365,6 @@ jobs:
       stemcell: tkgi-stemcell
     params:
       ENV_FILE: foundations/config/env.yml
-  # code_snippet upload-stemcell-usage end
 
 - name: download-upload-and-stage-tas
   serial: true
@@ -430,13 +391,12 @@ jobs:
       config: configuration
       vars: configuration
     params:
-      CONFIG_FILE: foundations/((foundation))/config/download-tas.yml
+      CONFIG_FILE: foundations/((foundation))/products/download-tas.yml
       VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
       SOURCE: s3
     output_mapping:
       downloaded-product: tas-product
       downloaded-stemcell: tas-stemcell
-  # code_snippet upload-product-usage start yaml
   - task: upload-tas-product
     image: platform-automation-image
     file: platform-automation-tasks/tasks/upload-product.yml
@@ -445,7 +405,6 @@ jobs:
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-  # code_snippet upload-product-usage end
   - task: upload-tas-stemcell
     image: platform-automation-image
     file: platform-automation-tasks/tasks/upload-stemcell.yml
@@ -454,7 +413,6 @@ jobs:
       stemcell: tas-stemcell
     params:
       ENV_FILE: foundations/config/env.yml
-  # code_snippet stage-product-usage start yaml
   - task: upload-and-stage-tas
     image: platform-automation-image
     file: platform-automation-tasks/tasks/stage-product.yml
@@ -463,7 +421,6 @@ jobs:
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-  # code_snippet stage-product-usage end
 
 - name: download-upload-and-stage-healthwatch
   serial: true
@@ -488,7 +445,7 @@ jobs:
         config: configuration
         vars: configuration
       params:
-        CONFIG_FILE: foundations/((foundation))/config/download-healthwatch.yml
+        CONFIG_FILE: foundations/((foundation))/products/download-healthwatch.yml
         VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
         SOURCE: s3
       output_mapping:
@@ -534,7 +491,7 @@ jobs:
         config: configuration
         vars: configuration
       params:
-        CONFIG_FILE: foundations/((foundation))/config/download-nsx-t.yml
+        CONFIG_FILE: foundations/((foundation))/products/download-nsx-t.yml
         VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
         SOURCE: s3
       output_mapping:
@@ -568,7 +525,6 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
-  # code_snippet configure-product-usage start yaml
   - task: configure-tkgi
     image: platform-automation-image
     file: platform-automation-tasks/tasks/configure-product.yml
@@ -581,7 +537,8 @@ jobs:
       ENV_FILE: foundations/config/env.yml
       VARS_FILES: |
         vars/foundations/((foundation))/vars/tkgi.yml
-  # code_snippet configure-product-usage end
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
 
 - name: configure-tas
   serial: true
@@ -612,7 +569,8 @@ jobs:
         ENV_FILE: foundations/config/env.yml
         VARS_FILES: |
           vars/foundations/((foundation))/vars/tas.yml
-          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
 
 - name: configure-healthwatch
   serial: true
@@ -643,7 +601,8 @@ jobs:
         ENV_FILE: foundations/config/env.yml
         VARS_FILES: |
           vars/foundations/((foundation))/vars/healthwatch.yml
-          vars/foundations/((foundation))/vars/director.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
 
 - name: configure-nsx-t
   serial: true
@@ -686,9 +645,10 @@ jobs:
       params:
         unpack: true
       passed:
-      - configure-pks
+      - configure-tkgi
       - configure-tas
       - configure-healthwatch
+      - configure-nsx-t
       trigger: false
     - get: platform-automation-tasks
       params:
@@ -698,7 +658,6 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
-  # code_snippet pre-deploy-check-usage start yaml
   - task: pre-deploy-check
     image: platform-automation-image
     file: platform-automation-tasks/tasks/pre-deploy-check.yml
@@ -706,8 +665,6 @@ jobs:
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-  # code_snippet pre-deploy-check-usage end
-  # code_snippet apply-changes-usage start yaml
   - task: apply-product-changes
     image: platform-automation-image
     file: platform-automation-tasks/tasks/apply-changes.yml
@@ -715,8 +672,6 @@ jobs:
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-  # code_snippet apply-changes-usage end
-  # code_snippet check-pending-changes-usage start yaml
   - task: check-pending-changes
     image: platform-automation-image
     file: platform-automation-tasks/tasks/check-pending-changes.yml
@@ -725,7 +680,6 @@ jobs:
     params:
       ENV_FILE: foundations/config/env.yml
       ALLOW_PENDING_CHANGES: true
-  # code_snippet check-pending-changes-usage end
   - task: export-installation
     image: platform-automation-image
     file: platform-automation-tasks/tasks/export-installation.yml
@@ -759,7 +713,6 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
-  # code_snippet run-bosh-errand-usage start yaml
   - task: run-bosh-errand
     image: platform-automation-image
     file: platform-automation-tasks/tasks/run-bosh-errand.yml
@@ -770,7 +723,6 @@ jobs:
       ERRAND_NAME: smoke_tests
       ENV_FILE: foundations/config/env.yml
       OPSMAN_SSH_PRIVATE_KEY: ((ops_manager_ssh_private_key))
-  # code_snippet run-bosh-errand-usage end
 
 - name: expiring-certificates
   serial: true
@@ -789,7 +741,6 @@ jobs:
       - get: state
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
-    # code_snippet expiring-certificates-usage start yaml
     - task: expiring-certificates
       image: platform-automation-image
       file: platform-automation-tasks/tasks/expiring-certificates.yml
@@ -798,7 +749,6 @@ jobs:
       params:
         ENV_FILE: foundations/config/env.yml
         EXPIRES_WITHIN: 6m
-    # code_snippet expiring-certificates-usage end
 
 - name: delete-installation
   serial: true
@@ -815,7 +765,6 @@ jobs:
       - get: state
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
-    # code_snippet delete-installation-usage start yaml
     - task: delete-installation
       image: platform-automation-image
       file: platform-automation-tasks/tasks/delete-installation.yml
@@ -823,8 +772,6 @@ jobs:
         env: configuration
       params:
         ENV_FILE: foundations/config/env.yml
-      # code_snippet delete-installation-usage end yaml
-    # code_snippet delete-vm-usage start yaml
     - task: delete-vm
       image: platform-automation-image
       file: platform-automation-tasks/tasks/delete-vm.yml
@@ -838,7 +785,4 @@ jobs:
         - put: state
           params:
             file: generated-state/state.yml
-    # code_snippet delete-vm-usage end
-# code_snippet reference-jobs end yaml
-# code_snippet reference-pipeline end
 # The previous line helps maintain current documentation at http://docs.pivotal.io.

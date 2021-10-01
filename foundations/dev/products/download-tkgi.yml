@@ -1,5 +1,4 @@
 
-# code_snippet download-pks-from-pivnet-usage start yaml
 ---
 pivnet-product-slug: pivotal-container-service
 
@@ -13,4 +12,3 @@ s3-bucket: ((s3_pivnet_products_bucket))
 s3-region-name: ((s3_region_name))
 s3-stemcell-path: stemcells
   #
-# code_snippet download-pks-from-pivnet-usage end
