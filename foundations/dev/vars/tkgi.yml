@@ -1,0 +1,6 @@
+---
+floating_ip_pool_id: 015616fd-d861-46f0-9e18-ee9de30eb1c0
+ip_block_id: 97d05113-671c-41a4-ab0f-ebbd660a3540
+nodes_ip_block_id: 577f23ef-122e-44f0-b74d-56d464be416a
+service_cluster_cidr: 10.100.200.0/24
+api_fqdn: api.tkgi.dev.uadsop.af.mil

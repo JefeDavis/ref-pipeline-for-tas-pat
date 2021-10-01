@@ -3,3 +3,6 @@ foundation: dev
 s3_foundation_state_bucket: platform-automation/dev/state/
 ops_manager_fqdn: opsman.dev.uadsop.af.mil
 availability_zone: DEV-AZ
+vsphere_vm_folder: dev/dev_vms
+vsphere_template_folder: dev/dev_templates
+vsphere_disks_folder: dev_disks

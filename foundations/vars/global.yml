@@ -5,7 +5,12 @@ s3_region_name: ""
 pipeline-repo-uri: git@git.uadsop.af.mil:/repos/platform-automation.git
 opsman_user_username: devsecops
 nsxt_manager_fqdn: TYFQ-NM-NSXTMVIPv.area52.afnoapps.usaf.mil
-networks:
-  deployment: DEPLOYMENT
-  infrastructure: INFRASTRUCTURE
-  services: SERVICES
+networks_deployment: DEPLOYMENT
+networks_infrastructure: INFRASTRUCTURE
+networks_services: SERVICES
+vsphere_vcenter: tyfq-vm-dsop01.area52.afnoapps.usaf.mil
+vsphere_cluster: VSAN-Cluster
+vsphere_datacenter: USAFE-DSOP
+vsphere_datastore: vsanDatastore
+domain_controllers: 132.25.70.11,132.25.70.12
+tier0_router: 1eabf927-6ba6-47a0-9d7c-b0c69b67ff1a
