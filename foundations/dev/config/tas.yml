@@ -361,7 +361,7 @@ product-properties:
     value: {}
 network-properties:
   network:
-    name: ((networks.deployment))
+    name: ((networks_deployment))
   other_availability_zones:
   - name: ((availability_zone))1
   - name: ((availability_zone))2

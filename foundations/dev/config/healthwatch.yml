@@ -37,7 +37,7 @@ product-properties:
     value: 15s
 network-properties:
   network:
-    name: ((networks.services))
+    name: ((networks_services))
   other_availability_zones:
   - name: ((availability_zone))1
   - name: ((availability_zone))2
