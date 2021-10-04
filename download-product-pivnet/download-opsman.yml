@@ -8,7 +8,7 @@ product-version-regex: ^2\.10\..*$ #^2\.\d+\.\d+$|^2\.\d+\.\d+-rc.*$|^2\.\d+\.\d
 
 s3-access-key-id: ((s3_access_key.username))
 s3-secret-access-key: ((s3_access_key.password))
-s3-bucket: ((s3_pivnet_products_bucket))
+s3-bucket: ((s3_installation_bucket))
 s3-region-name: ((s3_region_name))
 
 # code_snippet download-ops-manager-from-pivnet-usage end

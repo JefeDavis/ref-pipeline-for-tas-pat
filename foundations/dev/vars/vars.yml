@@ -1,6 +1,5 @@
 ---
 foundation: dev
-s3_foundation_state_bucket: platform-automation/dev/state/
 ops_manager_fqdn: opsman.dev.uadsop.af.mil
 ops_manager_private_ip: 172.17.1.10 
 ops_manager_vm_name: dev-opsman

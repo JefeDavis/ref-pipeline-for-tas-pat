@@ -7,7 +7,7 @@ resources:
     access_key_id: ((s3_access_key.username))
     secret_access_key: ((s3_access_key.password))
     region_name: ((s3_region_name))
-    bucket: ((s3_pivnet_products_bucket))
+    bucket: ((s3_installation_bucket))
     regexp: .*tasks-(.*).zip
     endpoint: ((s3_endpoint))
 
@@ -17,7 +17,7 @@ resources:
     access_key_id: ((s3_access_key.username))
     secret_access_key: ((s3_access_key.password))
     region_name: ((s3_region_name))
-    bucket: ((s3_pivnet_products_bucket))
+    bucket: ((s3_installation_bucket))
     regexp: .*image-(.*).tgz
     endpoint: ((s3_endpoint))
 
@@ -36,10 +36,10 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key.username))
-    bucket: ((s3_foundation_state_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    versioned_file: state.yml
+    versioned_file: ((foundation))/state/state.yml
     initial_content_text: '{}'
     initial_version: 'empty-start'
     endpoint: ((s3_endpoint))

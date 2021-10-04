@@ -1,5 +1,5 @@
 s3_endpoint: "https://minio.uadsop.af.mil:9000"
-s3_pivnet_products_bucket: "platform-automation"
+s3_installation_bucket: "platform-automation"
 s3_region_name: ""
 pipeline-repo-uri: git@git.uadsop.af.mil:/repos/platform-automation.git
 opsman_user_username: devsecops
