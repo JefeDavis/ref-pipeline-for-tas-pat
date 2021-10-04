@@ -749,44 +749,6 @@ jobs:
       params:
         ENV_FILE: foundations/config/env.yml
 
-- name: download-upload-and-stage-nsx-t
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: [ "upgrade-opsman" ]
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: download-nsx-t
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-nsx-t.yml
-        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: nsx-t-product
-        downloaded-stemcell: nsx-t-stemcell
-    - task: upload-and-stage-nsx-t
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: nsx-t-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-
 - name: configure-compliance-scanner
   serial: true
   serial_groups: [ install ]
