@@ -23,6 +23,6 @@ opsman-configuration:
     ntp: ((domain_controllers))
     private_ip: ((ops_manager_private_ip))
     ssh_public_key: ((opsman_ssh_key.public_key))   # REQUIRED Ops Manager >= 2.6
-    ssl-certificate:
-      certificate: ((opsman_cert.certificate))
-      private_key: ((opsman_cert.private_key))
+  ssl-certificate:
+    certificate: ((opsman_cert.certificate))
+    private_key: ((opsman_cert.private_key))
