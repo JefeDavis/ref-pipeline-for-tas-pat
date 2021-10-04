@@ -1,5 +1,7 @@
 s3_endpoint: "https://minio.uadsop.af.mil:9000"
 s3_installation_bucket: "platform-automation"
+s3_products_bucket: "products"
+s3_stemcells_bucket: "stemcells"
 s3_state_bucket: "state"
 s3_region_name: "us-east-1"
 pipeline-repo-uri: git@git.uadsop.af.mil:/repos/platform-automation.git
