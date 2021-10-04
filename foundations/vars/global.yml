@@ -3,8 +3,7 @@ s3_installation_bucket: "platform-automation"
 s3_state_bucket: "state"
 s3_region_name: "us-east-1"
 pipeline-repo-uri: git@git.uadsop.af.mil:/repos/platform-automation.git
-opsman_user.username: devsecops
-sxt_manager_fqdn: TYFQ-NM-NSXTMVIPv.area52.afnoapps.usaf.mil
+nsxt_manager_fqdn: TYFQ-NM-NSXTMVIPv.area52.afnoapps.usaf.mil
 networks_deployment: DEPLOYMENT
 networks_infrastructure: INFRASTRUCTURE
 networks_services: SERVICES
