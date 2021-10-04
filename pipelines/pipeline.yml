@@ -39,9 +39,10 @@ resources:
     bucket: state
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: ((foundation))/state.yml
+    regexp: ((foundation))/state-(.*).yml
+    initial_path: ((foundation))/state-0.0.0.yml
     # versioned_file: ((foundation))/state/state.yml
-    # initial_content_text: '{}'
+    initial_content_text: '{}'
     # initial_version: 'empty-start'
     endpoint: ((s3_endpoint))
 
