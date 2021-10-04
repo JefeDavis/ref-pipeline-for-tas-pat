@@ -5,6 +5,6 @@ versions:
   fim: 2.1.5
   mysql: 2.10.4
   nsx-t: 3.1.2
-  opsman: 2.10.16
+  opsman: 2.10.18
   tas: 2.11.4
   tkgi: 1.11.2
