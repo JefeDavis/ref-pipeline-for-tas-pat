@@ -83,7 +83,7 @@ prepare-image: &prepare-image
   image: platform-automation-image
   file: platform-automation-tasks/tasks/prepare-image.yml
   params:
-    CA_CERTS: ((wcf))
+    CA_CERTS: ((trusted_certs))
 jobs:
 - name: test-platform-automation
   serial: true
@@ -135,7 +135,10 @@ jobs:
       vars: configuration
     params:
       CONFIG_FILE: foundations/((foundation))/products/download-opsman.yml
-      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/versions.yml 
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
       SOURCE: s3
     output_mapping:
       downloaded-product: opsman-image
