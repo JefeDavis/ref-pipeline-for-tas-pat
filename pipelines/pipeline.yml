@@ -98,7 +98,7 @@ jobs:
       image: platform-automation-image
       file: platform-automation-tasks/tasks/test-interpolate.yml
       params:
-        CONFIG_FILE: foundations/((foundation))/config/download-tas.yml
+        CONFIG_FILE: foundations/((foundation))/products/download-tas.yml
         SKIP_MISSING: true
       input_mapping:
         config: configuration
@@ -132,7 +132,7 @@ jobs:
       config: configuration
       vars: configuration
     params:
-      CONFIG_FILE: foundations/((foundation))/config/download-opsman.yml
+      CONFIG_FILE: foundations/((foundation))/products/download-opsman.yml
       VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
       SOURCE: s3
     output_mapping:
@@ -279,7 +279,7 @@ jobs:
       config: configuration
       vars: configuration
     params:
-      CONFIG_FILE: foundations/((foundation))/config/download-opsman.yml
+      CONFIG_FILE: foundations/((foundation))/products/download-opsman.yml
       VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
       SOURCE: s3
     output_mapping:
