@@ -951,6 +951,38 @@ jobs:
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
 
+- name: configure-tkgi
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        passed:
+          - download-upload-and-stage-tkgi
+        trigger: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: configure-tkgi
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/tkgi.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/tkgi.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
 - name: configure-healthwatch
   serial: true
   serial_groups: [ install ]
@@ -1028,6 +1060,11 @@ jobs:
       - configure-tas
       - configure-healthwatch
       - configure-nsx-t
+      - configure-antivirus
+      - configure-antivirus-mirror
+      - configure-compliance-scanner
+      - configure-file-integrity-monitoring
+      - configure-mysql
       trigger: false
     - get: platform-automation-tasks
       params:
@@ -1070,38 +1107,6 @@ jobs:
   - put: installation
     params:
       file: installation/((foundation))-installation*.zip
-
-- name: run-tas-smoketest-errand
-  serial: true
-  plan:
-  - in_parallel:
-    - get: platform-automation-image
-      params:
-        unpack: true
-      passed:
-      - configure-pks
-      - configure-tas
-      - configure-healthwatch
-      - configure-nsx-t
-      trigger: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  - task: run-bosh-errand
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/run-bosh-errand.yml
-    input_mapping:
-      env: configuration
-    params:
-      PRODUCT_NAME: cf
-      ERRAND_NAME: smoke_tests
-      ENV_FILE: foundations/config/env.yml
-      OPSMAN_SSH_PRIVATE_KEY: ((ops_manager_ssh_private_key))
 
 - name: expiring-certificates
   serial: true
