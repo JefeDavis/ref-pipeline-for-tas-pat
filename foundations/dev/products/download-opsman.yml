@@ -6,7 +6,6 @@ product-version: ((versions.opsman))
 
 s3-access-key-id: ((s3_access_key.username))
 s3-secret-access-key: ((s3_access_key.password))
-s3-bucket: ((s3_installation_bucket))/products/
+#s3-bucket: ((s3_installation_bucket))/products/
 s3-region-name: ((s3_region_name))
-s3-endpoint: ((s3_endpoint))
-
+s3-endpoint: "https://minio.uadsop.af.mil:9000/platform-automation/products/"
