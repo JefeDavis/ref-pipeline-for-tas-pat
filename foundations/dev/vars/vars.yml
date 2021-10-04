@@ -4,9 +4,9 @@ ops_manager_fqdn: opsman.dev.uadsop.af.mil
 ops_manager_private_ip: 172.17.1.10 
 ops_manager_vm_name: dev-opsman
 availability_zone: DEV-AZ
-vsphere_vm_folder: dev/dev_vms
-vsphere_vm_mgmt_folder: dev/dev_mgmt
-vsphere_template_folder: dev/dev_templates
+vsphere_vm_folder: /USAFE-DSOP/vm/Dev/dev_vms
+vsphere_vm_mgmt_folder: /USAFE-DSOP/vm/Dev/dev_mgmt
+vsphere_template_folder: /USAFE-DSOP/vm/Dev/dev_templates
 vsphere_disks_folder: dev_disks
 infrastructure_gateway: 172.17.1.1
 infrastructure_subnet_mask: 255.255.255.0
