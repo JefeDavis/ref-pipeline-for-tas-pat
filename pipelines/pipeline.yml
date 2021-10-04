@@ -152,7 +152,7 @@ jobs:
       vars: configuration
     params:
       OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-      STATE_FILE: state-*.yml
+      STATE_FILE: state-$timestamp.yml
       VARS_FILES: |
         vars/foundations/((foundation))/vars/director.yml
         vars/foundations/((foundation))/vars/vars.yml
