@@ -36,11 +36,11 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key.username))
-    bucket: state
+    bucket: ((s3_state_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: ((foundation))/state-(.*).yml
-    initial_path: ((foundation))/state-0.0.0.yml
+    initial_path: ((foundation))/state-$timestamp.yml
     # versioned_file: ((foundation))/state/state.yml
     initial_content_text: '{}'
     # initial_version: 'empty-start'
@@ -151,7 +151,7 @@ jobs:
       vars: configuration
     params:
       OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-      STATE_FILE: state-((foundation)).yml
+      STATE_FILE: state-*.yml
       VARS_FILES: |
         vars/foundations/((foundation))/vars/director.yml
         vars/foundations/((foundation))/vars/vars.yml
@@ -160,7 +160,7 @@ jobs:
       do:
       - put: state
         params:
-          file: generated-state/state-((foundation)).yml
+          file: generated-state/state-*.yml
   - task: configure-authentication
     image: platform-automation-image
     file: platform-automation-tasks/tasks/configure-authentication.yml
@@ -300,7 +300,7 @@ jobs:
     params:
       ENV_FILE: foundations/config/env.yml
       OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-      STATE_FILE: state-((foundation)).yml
+      STATE_FILE: state-*.yml
       INSTALLATION_FILE: ((foundation))-installation*.zip
       VARS_FILES: |
         vars/foundations/((foundation))/vars/director.yml
