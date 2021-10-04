@@ -241,7 +241,7 @@ product-properties:
     value:
     - name: JSESSIONID
   .properties.routing_custom_ca_certificates:
-    value: ((trusted_cas))
+    value: ((trusted_certs))
   .properties.routing_disable_http:
     value: false
   .properties.routing_log_client_ips:
