@@ -6,7 +6,7 @@ opsman-configuration:
       ca_cert: ((opsman_cert.ca))                 # REQUIRED if insecure = 0 (secure)
       datacenter: ((vsphere_datacenter))
       datastore: ((vsphere_datastore))
-      folder: ((vsphere_vm_folder))
+      folder: ((vsphere_vm_mgmt_folder))
       url: ((vsphere_vcenter))
       username: ((vcenter_user.username))
       password: ((vcenter_user.password))
