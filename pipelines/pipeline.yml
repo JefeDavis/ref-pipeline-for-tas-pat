@@ -29,6 +29,7 @@ resources:
     region_name: ((s3_region_name))
     bucket: ((s3_installation_bucket))
     regexp: ((foundation))-installation-(.*).zip
+    endpoint: ((s3_endpoint))
 
 # VM state and foundation configuration
 - name: state
@@ -41,6 +42,7 @@ resources:
     versioned_file: state.yml
     initial_content_text: '{}'
     initial_version: 'empty-start'
+    endpoint: ((s3_endpoint))
 
 # configurations
 - name: configuration
