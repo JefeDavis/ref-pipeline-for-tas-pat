@@ -4,7 +4,7 @@ pivnet-api-token: ((pivnet_token))
 pivnet-product-slug: p-spring-cloud-services
 
 file-glob: "p_spring-cloud-services-*.pivotal"
-product-version-regex: ^3\.1\..*$
+product-version-regex: ((versions.spring-cloud-services.download-regexp))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))

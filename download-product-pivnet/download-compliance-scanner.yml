@@ -4,7 +4,7 @@ pivnet-api-token: ((pivnet_token))
 pivnet-product-slug: p-compliance-scanner
 
 file-glob: "p-compliance-scanner-*.pivotal"
-product-version-regex: ^1\.2\..*$
+product-version-regex: ((versions.compliance-scanner.download-regexp))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))

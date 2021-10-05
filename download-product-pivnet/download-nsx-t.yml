@@ -4,7 +4,7 @@ pivnet-api-token: ((pivnet_token))
 pivnet-product-slug: vmware-nsx-t
 
 file-glob: "VMware-NSX-T-*.pivotal"
-product-version-regex: ^3\.1\..*$
+product-version-regex: ((versions.nsx-t.download-regexp))
 
 s3-access-key-id: ((s3_access_key.username))
 s3-secret-access-key: ((s3_access_key.password))

@@ -4,7 +4,7 @@ pivnet-api-token: ((pivnet_token))
 pivnet-product-slug: p-fim-addon
 
 file-glob: "p-fim-*.pivotal"
-product-version-regex: ^2\.1\..*$
+product-version-regex: ((versions.file-integrity-monitoring.download-regexp))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))

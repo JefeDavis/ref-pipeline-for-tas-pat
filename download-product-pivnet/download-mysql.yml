@@ -4,7 +4,7 @@ pivnet-api-token: ((pivnet_token))
 pivnet-product-slug: pivotal-mysql
 
 file-glob: "pivotal-mysql-*.pivotal"
-product-version-regex: ^2\.10\..*$
+product-version-regex: ((versions.mysql.download-regexp))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))

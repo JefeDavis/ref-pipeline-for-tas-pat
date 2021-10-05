@@ -4,7 +4,7 @@ pivnet-api-token: ((pivnet_token))
 pivnet-product-slug: harbor-container-registry
 
 file-glob: "harbor-container-registry-*.pivotal"
-product-version-regex: ^2\.3\..*$
+product-version-regex: ((versions.harbor-registry.download-regexp))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))
