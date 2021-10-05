@@ -3,7 +3,8 @@ versions:
   antivirus: 2.3.10
   compliance-scanner: 1.2.49
   fim: 2.1.5
-  mysql: 2.10.14
+  healthwatch: 2.1.4
+  mysql: 2.10.4
   nsx-t: 3.1.2.4
   opsman: 2.10.18
   tas: 2.11.7
