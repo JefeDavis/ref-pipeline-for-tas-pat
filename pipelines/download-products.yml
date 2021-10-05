@@ -26,7 +26,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[pivotal-container-service,(.*)\]pivotal-container-service-.*.pivotal
+    regexp: products/\[pivotal-container-service,(.*)\]pivotal-container-service-.*.pivotal
 
 - name: tkgi-stemcell
   type: s3
@@ -36,7 +36,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: antivirus-product
   type: s3
@@ -66,7 +66,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[p-clamav-addon,(.*)\]p-antivirus-mirror-.*.pivotal
+    regexp: products/\[p-clamav-addon,(.*)\]p-antivirus-mirror-.*.pivotal
 
 - name: antivirus-mirror-stemcell
   type: s3
@@ -76,7 +76,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: file-integrety-monitoring-product
   type: s3
@@ -86,7 +86,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[p-fim-addon,(.*)\]p-fim-.*.pivotal
+    regexp: products/\[p-fim-addon,(.*)\]p-fim-.*.pivotal
 
 - name: file-integrety-monitoring-stemcell
   type: s3
@@ -96,7 +96,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: compliance-scanner-product
   type: s3
@@ -106,7 +106,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[p-compliance-scanner,(.*)\]p-compliance-scanner-.*.pivotal
+    regexp: products/\[p-compliance-scanner,(.*)\]p-compliance-scanner-.*.pivotal
 
 - name: compliance-scanner-stemcell
   type: s3
@@ -116,7 +116,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: harbor-registry-product
   type: s3
@@ -126,7 +126,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[harbor-container-registry,(.*)\]harbor-container-registry-.*.pivotal
+    regexp: products/\[harbor-container-registry,(.*)\]harbor-container-registry-.*.pivotal
 
 - name: harbor-registry-stemcell
   type: s3
@@ -136,7 +136,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: healthwatch-product
   type: s3
@@ -146,7 +146,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[p-healthwatch,(.*)\].*.pivotal
+    regexp: products/\[p-healthwatch,(.*)\].*.pivotal
 
 - name: healthwatch-stemcell
   type: s3
@@ -156,7 +156,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: tas-product
   type: s3
@@ -166,7 +166,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[elastic-runtime,(.*)\]cf-.*.pivotal
+    regexp: products/\[elastic-runtime,(.*)\]cf-.*.pivotal
 
 - name: tas-stemcell
   type: s3
@@ -176,7 +176,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: nsx-t-product
   type: s3
@@ -186,7 +186,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[vmware-nsx-t,(.*)\]VMware-NSX-T-.*.pivotal
+    regexp: products/\[vmware-nsx-t,(.*)\]VMware-NSX-T-.*.pivotal
 
 - name: mysql-product
   type: s3
@@ -196,7 +196,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[pivotal-mysql,(.*)\]pivotal-mysql-.*.pivotal
+    regexp: products/\[pivotal-mysql,(.*)\]pivotal-mysql-.*.pivotal
 
 - name: mysql-stemcell
   type: s3
@@ -206,7 +206,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
         
 - name: sso-product
   type: s3
@@ -216,7 +216,7 @@ resources:
     endpoint: ((s3_endpoint))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[pivotal_single_sign-on_service,(.*)\]Pivotal_Single_Sign-On_Service_.*.pivotal
+    regexp: products/\[pivotal_single_sign-on_service,(.*)\]Pivotal_Single_Sign-On_Service_.*.pivotal
 
 - name: sso-stemcell
   type: s3
@@ -226,7 +226,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
         
 - name: redis-product
   type: s3
@@ -236,7 +236,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[p-redis,(.*)\]p-redis-.*.pivotal
+    regexp: products/\[p-redis,(.*)\]p-redis-.*.pivotal
 
 - name: redis-stemcell
   type: s3
@@ -246,7 +246,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: rabbitmq-product
   type: s3
@@ -256,7 +256,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[p-rabbitmq,(.*)\]p-rabbitmq-.*.pivotal
+    regexp: products/\[p-rabbitmq,(.*)\]p-rabbitmq-.*.pivotal
 
 - name: rabbitmq-stemcell
   type: s3
@@ -266,7 +266,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
         
 - name: credhub-sb-product
   type: s3
@@ -276,7 +276,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[credhub-service-broker,(.*)\]credhub-service-broker-.*.pivotal
+    regexp: products/\[credhub-service-broker,(.*)\]credhub-service-broker-.*.pivotal
 
 - name: credhub-sb-stemcell
   type: s3
@@ -286,7 +286,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: metrics-product
   type: s3
@@ -296,7 +296,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[apm,(.*)\]app-metrics-.*.pivotal
+    regexp: products/\[apm,(.*)\]app-metrics-.*.pivotal
 
 - name: metrics-stemcell
   type: s3
@@ -306,7 +306,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: metric-store-product
   type: s3
@@ -316,7 +316,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[p-metric-store,(.*)\]metric-store-.*.pivotal
+    regexp: products/\[p-metric-store,(.*)\]metric-store-.*.pivotal
 
 - name: metric-store-stemcell
   type: s3
@@ -326,7 +326,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: spring-cloud-services-product
   type: s3
@@ -336,7 +336,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[p-spring-cloud-services,(.*)\]p_spring-cloud-services-.*.pivotal
+    regexp: products/\[p-spring-cloud-services,(.*)\]p_spring-cloud-services-.*.pivotal
 
 - name: spring-cloud-services-stemcell
   type: s3
@@ -346,7 +346,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: platform-automation-pivnet
   type: pivnet
