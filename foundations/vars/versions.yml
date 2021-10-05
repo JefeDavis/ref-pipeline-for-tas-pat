@@ -1,0 +1,74 @@
+---
+versions:
+  antivirus:
+    download-regexp: ^2\.3\..*$
+    dev: 2.3.10
+    prod:
+  antivirus-mirror:
+    download-regexp: ^2\.3\..*$
+    dev: 2.3.10
+    prod:
+  compliance-scanner:
+    download-regexp: ^1\.2\..*$
+    dev: 1.2.49
+    prod:
+  credhub-sb:
+    download-regexp: ^1\.5\..*$
+    dev:
+    prod:
+  file-integrety-monitoring:
+    download-regexp: ^2\.1\..*$
+    dev: 2.1.5
+    prod:
+  harbor-container-registry:
+    download-regexp: ^2\.3\..*$
+    dev:
+    prod:
+  healthwatch:
+    download-regexp: ^2\.1\..*$
+    dev: 2.1.4
+    prod:
+  metric-store:
+    download-regexp: ^1\.5\..*$
+    dev:
+    prod:
+  metrics:
+    download-regexp: ^2\.0\..*$
+    dev:
+    prod:
+  mysql:
+    download-regexp: ^2\.10\..*$
+    dev: 2.10.4
+    prod:
+  nsx-t:
+    download-regexp: ^3\.1\..*$
+    dev: 2.10.4
+    prod:
+  opsman:
+    download-regexp: ^2\.10\..*$
+    dev: 2.10.18
+    prod:
+  rabbitmq-product:
+    download-regexp: ^2\.0\..*$
+    dev:
+    prod:
+  redis:
+    download-regexp: ^2\.4\..*$
+    dev:
+    prod:
+  spring-cloud-services:
+    download-regexp: ^3\.1\..*$
+    dev:
+    prod:
+  sso:
+    download-regexp: ^1\.14\..*$
+    dev:
+    prod:
+  tas:
+    download-regexp: ^2\.11\..*$
+    dev: 2.10.18
+    prod:
+  tkgi:
+    download-regexp: ^1\.11\..*$
+    dev:  2.10.18
+    prod:
