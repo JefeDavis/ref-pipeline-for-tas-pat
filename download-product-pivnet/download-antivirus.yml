@@ -3,7 +3,7 @@
 pivnet-api-token: ((pivnet_token))
 pivnet-product-slug: p-clamav-addon
 
-file-glob: "p-antivirus-[!mirror]*.pivotal"
+file-glob: "p-antivirus-[0-9]*.pivotal"
 product-version-regex: ^2\.3\..*$
 stemcell-iaas: vsphere
 
