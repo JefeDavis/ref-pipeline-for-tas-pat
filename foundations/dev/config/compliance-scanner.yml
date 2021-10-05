@@ -14,8 +14,6 @@ product-properties:
   .properties.bucket_selector:
     selected_option: none
     value: none
-  .properties.cni_dir:
-    value: /var/vcap/jobs/flanneld
   .properties.cpu_limit:
     value: 50
   .properties.detection_timeout:
