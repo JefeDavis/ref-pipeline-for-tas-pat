@@ -178,7 +178,7 @@ product-properties:
   .properties.networking_poe_ssl_certs:
     value:
     - certificate:
-        cert_pem: ((tas_wildcard_cert.certificate)
+        cert_pem: ((tas_wildcard_cert.certificate))
         private_key_pem: ((tas_wildcard_cert.private_key))
         name: ((poe_ssl_cert_name))
   .properties.networkpolicyserver_database_max_open_connections:
