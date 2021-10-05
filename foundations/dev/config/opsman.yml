@@ -14,7 +14,7 @@ opsman-configuration:
     cpu: 2                         # default - 1
     memory: 8                      # default - 8 (GB)
     disk_type: thin     # thin|thick
-    disk_size: 150
+    disk_size: 200
     dns: ((domain_controllers))
     gateway: ((infrastructure_gateway))
     hostname: ((ops_manager_fqdn))
