@@ -407,7 +407,7 @@ prepare-image: &prepare-image
   image: platform-automation-image
   file: platform-automation-tasks/tasks/prepare-image.yml
   params:
-    CA_CERTS: ((wcf))
+    CA_CERTS: ((trusted_certs))
 
 
 jobs:
