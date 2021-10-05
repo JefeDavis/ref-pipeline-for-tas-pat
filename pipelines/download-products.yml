@@ -1039,8 +1039,8 @@ jobs:
       params:
         CONFIG_FILE: download-product-pivnet/download-tas.yml
         VARS_FILES: |
-        vars/foundations/vars/global.yml
-        vars/foundations/vars/versions.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/vars/versions.yml
       input_mapping:
         config: configuration
         vars: configuration
@@ -1077,8 +1077,8 @@ jobs:
       params:
         CONFIG_FILE: download-product-pivnet/download-nsx-t.yml
         VARS_FILES: |
-        vars/foundations/vars/global.yml
-        vars/foundations/vars/versions.yml
+          vars/foundations/vars/global.yml
+          vars/foundations/vars/versions.yml
       input_mapping:
         config: configuration
         vars: configuration
