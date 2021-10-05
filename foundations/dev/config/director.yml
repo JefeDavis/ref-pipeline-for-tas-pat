@@ -103,7 +103,7 @@ properties-configuration:
     local_blobstore_options:
       enable_signed_urls: true
     metrics_server_enabled: false
-    ntp_servers_string: ()
+    ntp_servers_string: ((domain_controllers))
     post_deploy_enabled: true
     resurrector_enabled: true
     retry_bosh_deploys: false
