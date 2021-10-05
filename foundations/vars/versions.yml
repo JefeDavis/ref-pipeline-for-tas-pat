@@ -14,7 +14,7 @@ versions:
     prod:
   credhub-sb:
     download-regexp: ^1\.5\..*$
-    dev:
+    dev: 1.5.1
     prod:
   file-integrety-monitoring:
     download-regexp: ^2\.1\..*$
@@ -22,7 +22,7 @@ versions:
     prod:
   harbor-container-registry:
     download-regexp: ^2\.3\..*$
-    dev:
+    dev: 2.3.2
     prod:
   healthwatch:
     download-regexp: ^2\.1\..*$
@@ -30,11 +30,11 @@ versions:
     prod:
   metric-store:
     download-regexp: ^1\.5\..*$
-    dev:
+    dev: 1.5.3
     prod:
   metrics:
     download-regexp: ^2\.0\..*$
-    dev:
+    dev: 2.0.7
     prod:
   mysql:
     download-regexp: ^2\.10\..*$
@@ -42,31 +42,31 @@ versions:
     prod:
   nsx-t:
     download-regexp: ^3\.1\..*$
-    dev: 2.10.4
+    dev: 3.1.2.4
     prod:
   opsman:
     download-regexp: ^2\.10\..*$
     dev: 2.10.18
     prod:
-  rabbitmq-product:
+  rabbitmq:
     download-regexp: ^2\.0\..*$
-    dev:
+    dev: 2.0.6
     prod:
   redis:
     download-regexp: ^2\.4\..*$
-    dev:
+    dev: 2.4.3
     prod:
   spring-cloud-services:
     download-regexp: ^3\.1\..*$
-    dev:
+    dev: 3.1.22
     prod:
   sso:
     download-regexp: ^1\.14\..*$
-    dev:
+    dev: 1.14.3
     prod:
   tas:
     download-regexp: ^2\.11\..*$
-    dev: 2.10.18
+    dev: 2.11.7
     prod:
   tkgi:
     download-regexp: ^1\.11\..*$
