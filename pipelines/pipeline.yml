@@ -287,7 +287,9 @@ jobs:
       vars: configuration
     params:
       CONFIG_FILE: foundations/((foundation))/products/download-opsman.yml
-      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/versions.yml 
+        vars/foundations/vars/global.yml
       SOURCE: s3
     output_mapping:
       downloaded-product: opsman-image
