@@ -172,7 +172,7 @@ jobs:
     params:
       ENV_FILE: foundations/config/env.yml
       AUTH_CONFIG_FILE: foundations/config/auth.yml
-      VARS_FILES: foundations/((foundation))/vars/vars.yml
+      VARS_FILES: config/foundations/((foundation))/vars/vars.yml
   - task: configure-opsman
     image: platform-automation-image
     file: platform-automation-tasks/tasks/configure-opsman.yml
