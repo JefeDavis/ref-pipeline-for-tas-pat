@@ -13,7 +13,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[ops-manager,(.*)\]ops-manager-vsphere.*.ova
@@ -23,7 +23,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[pivotal-container-service,(.*)\]pivotal-container-service-.*.pivotal
@@ -33,7 +33,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -43,27 +43,27 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[p-clamav-addon,(.*)\]p-antivirus-.*.pivotal
+    regexp: products\[p-clamav-addon,(.*)\]p-antivirus-.*.pivotal
 
 - name: antivirus-stemcell
   type: s3
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: antivirus-mirror-product
   type: s3
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[p-clamav-addon,(.*)\]p-antivirus-mirror-.*.pivotal
@@ -73,7 +73,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -83,7 +83,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[p-fim-addon,(.*)\]p-fim-.*.pivotal
@@ -93,7 +93,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -103,7 +103,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[p-compliance-scanner,(.*)\]p-compliance-scanner-.*.pivotal
@@ -113,7 +113,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -123,7 +123,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[harbor-container-registry,(.*)\]harbor-container-registry-.*.pivotal
@@ -133,7 +133,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -143,7 +143,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[p-healthwatch,(.*)\].*.pivotal
@@ -153,7 +153,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -163,7 +163,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[elastic-runtime,(.*)\]cf-.*.pivotal
@@ -173,7 +173,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -183,7 +183,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[vmware-nsx-t,(.*)\]VMware-NSX-T-.*.pivotal
@@ -193,7 +193,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[pivotal-mysql,(.*)\]pivotal-mysql-.*.pivotal
@@ -203,7 +203,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -212,7 +212,7 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key.username))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     endpoint: ((s3_endpoint))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
@@ -223,7 +223,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -233,7 +233,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[p-redis,(.*)\]p-redis-.*.pivotal
@@ -243,7 +243,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -253,7 +253,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[p-rabbitmq,(.*)\]p-rabbitmq-.*.pivotal
@@ -263,7 +263,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -273,7 +273,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[credhub-service-broker,(.*)\]credhub-service-broker-.*.pivotal
@@ -283,7 +283,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -293,7 +293,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[apm,(.*)\]app-metrics-.*.pivotal
@@ -303,7 +303,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -313,7 +313,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[p-metric-store,(.*)\]metric-store-.*.pivotal
@@ -323,7 +323,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
@@ -333,7 +333,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_products_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[p-spring-cloud-services,(.*)\]p_spring-cloud-services-.*.pivotal
@@ -343,7 +343,7 @@ resources:
   source:
     access_key_id: ((s3_access_key.username))
     endpoint: ((s3_endpoint))
-    bucket: ((s3_stemcells_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
     regexp: \[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
