@@ -70,7 +70,7 @@ networks-configuration:
       - ((availability_zone))1
       - ((availability_zone))2
       - ((availability_zone))3
-  - name: (networks_services)
+  - name: ((networks_services))
     subnets:
     - iaas_identifier: ((networks.services.name))
       cidr: ((networks.services.cidr))
