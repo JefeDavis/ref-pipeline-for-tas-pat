@@ -7,10 +7,8 @@ product-properties:
     - CIS-Level-1
     - CIS-Level-2
     - STIG
-    - TKGI-CIS-Master
-    - TKGI-CIS-Worker
-    - TKGI-STIG-Master
-    - TKGI-STIG-Worker
+    - TKGI-Master
+    - TKGI-Worker
   .properties.bucket_selector:
     selected_option: none
     value: none
