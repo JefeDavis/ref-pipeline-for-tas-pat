@@ -13,5 +13,6 @@ s3-secret-access-key: ((s3_access_key.password))
 s3-bucket: ((s3_installation_bucket))
 s3-region-name: ((s3_region_name))
 s3-stemcell-path: stemcells
+s3-product-path: products
   #
 # code_snippet download-pks-from-pivnet-usage end

@@ -28,7 +28,7 @@ resources:
     secret_access_key: ((s3_access_key.password))
     region_name: ((s3_region_name))
     bucket: ((s3_installation_bucket))
-    regexp: ((foundation))-installation-(.*).zip
+    regexp: ((foundation))/((foundation))-installation-(.*).zip
     endpoint: ((s3_endpoint))
 
 # VM state and foundation configuration
