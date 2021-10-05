@@ -434,7 +434,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-opsman.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -466,7 +468,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-antivirus.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -502,7 +506,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-antivirus-mirror.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -538,7 +544,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-file-integrity-monitoring.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -574,7 +582,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-compliance-scanner.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -610,7 +620,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-harbor-registry.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -646,7 +658,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-healthwatch.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -682,7 +696,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-mysql.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -718,7 +734,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-sso.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -754,7 +772,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-redis.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -790,7 +810,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-rabbitmq.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -826,7 +848,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-credhub-sb.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -862,7 +886,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-metrics.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -898,7 +924,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-metric-store.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -934,7 +962,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-spring-cloud-services.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -970,7 +1000,9 @@ jobs:
     file: platform-automation-tasks/tasks/download-product.yml
     params:
       CONFIG_FILE: download-product-pivnet/download-tkgi.yml
-      VARS_FILES: vars/foundations/vars/global.yml
+      VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
     input_mapping:
       config: configuration
       vars: configuration
@@ -1006,7 +1038,9 @@ jobs:
       file: platform-automation-tasks/tasks/download-product.yml
       params:
         CONFIG_FILE: download-product-pivnet/download-tas.yml
-        VARS_FILES: vars/foundations/vars/global.yml
+        VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
       input_mapping:
         config: configuration
         vars: configuration
@@ -1042,7 +1076,9 @@ jobs:
       file: platform-automation-tasks/tasks/download-product.yml
       params:
         CONFIG_FILE: download-product-pivnet/download-nsx-t.yml
-        VARS_FILES: vars/foundations/vars/global.yml
+        VARS_FILES: |
+        vars/foundations/vars/global.yml
+        vars/foundations/vars/versions.yml
       input_mapping:
         config: configuration
         vars: configuration
