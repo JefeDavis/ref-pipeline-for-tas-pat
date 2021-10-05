@@ -16,7 +16,7 @@ versions:
     download-regexp: ^1\.5\..*$
     dev: 1.5.1
     prod:
-  file-integrety-monitoring:
+  file-integrity-monitoring:
     download-regexp: ^2\.1\..*$
     dev: 2.1.5
     prod:
