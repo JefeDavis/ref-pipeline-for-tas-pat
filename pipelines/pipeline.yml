@@ -348,105 +348,111 @@ jobs:
   serial: true
   serial_groups: [ products ]
   plan:
-  - in_parallel:
-    - get: platform-automation-image
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        trigger: true
+        passed: [ "upgrade-opsman" ]
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-tkgi
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
       params:
-        unpack: true
-      trigger: true
-      passed: [ "upgrade-opsman" ]
-    - get: platform-automation-tasks
+        CONFIG_FILE: foundations/((foundation))/products/download-tkgi.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: tkgi-product
+        downloaded-stemcell: tkgi-stemcell
+    - task: upload-and-stage-tkgi
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: tkgi-product
+        env: configuration
       params:
-        unpack: true
-    - get: configuration
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  - task: download-tkgi
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/download-product.yml
-    input_mapping:
-      config: configuration
-      vars: configuration
-    params:
-      CONFIG_FILE: foundations/((foundation))/products/download-tkgi.yml
-      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
-      SOURCE: s3
-    output_mapping:
-      downloaded-product: tkgi-product
-      downloaded-stemcell: tkgi-stemcell
-  - task: upload-and-stage-tkgi
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-    input_mapping:
-      product: tkgi-product
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: upload-tkgi-stemcell
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/upload-stemcell.yml
-    input_mapping:
-      env: configuration
-      stemcell: tkgi-stemcell
-    params:
-      ENV_FILE: foundations/config/env.yml
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-tkgi-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: tkgi-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
 
 - name: download-upload-and-stage-tas
   serial: true
   serial_groups: [ products ]
   plan:
-  - in_parallel:
-    - get: platform-automation-image
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        trigger: true
+        passed: [ "upgrade-opsman" ]
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-tas
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
       params:
-        unpack: true
-      trigger: true
-      passed: [ "upgrade-opsman" ]
-    - get: platform-automation-tasks
+        CONFIG_FILE: foundations/((foundation))/products/download-tas.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: tas-product
+        downloaded-stemcell: tas-stemcell
+    - task: upload-tas-product
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-product.yml
+      input_mapping:
+        product: tas-product
+        env: configuration
       params:
-        unpack: true
-    - get: configuration
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  - task: download-tas
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/download-product.yml
-    input_mapping:
-      config: configuration
-      vars: configuration
-    params:
-      CONFIG_FILE: foundations/((foundation))/products/download-tas.yml
-      VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
-      SOURCE: s3
-    output_mapping:
-      downloaded-product: tas-product
-      downloaded-stemcell: tas-stemcell
-  - task: upload-tas-product
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/upload-product.yml
-    input_mapping:
-      product: tas-product
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: upload-tas-stemcell
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/upload-stemcell.yml
-    input_mapping:
-      env: configuration
-      stemcell: tas-stemcell
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: upload-and-stage-tas
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/stage-product.yml
-    input_mapping:
-      product: tas-product
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-tas-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: tas-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-and-stage-tas
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/stage-product.yml
+      input_mapping:
+        product: tas-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
 
 - name: download-upload-and-stage-healthwatch
   serial: true
@@ -472,7 +478,10 @@ jobs:
         vars: configuration
       params:
         CONFIG_FILE: foundations/((foundation))/products/download-healthwatch.yml
-        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
         SOURCE: s3
       output_mapping:
         downloaded-product: healthwatch-product
@@ -518,7 +527,10 @@ jobs:
         vars: configuration
       params:
         CONFIG_FILE: foundations/((foundation))/products/download-compliance-scanner.yml
-        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
         SOURCE: s3
       output_mapping:
         downloaded-product: compliance-scanner-product
@@ -564,7 +576,10 @@ jobs:
         vars: configuration
       params:
         CONFIG_FILE: foundations/((foundation))/products/download-file-integrity-monitoring.yml
-        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
         SOURCE: s3
       output_mapping:
         downloaded-product: file-integrity-monitoring-product
@@ -610,7 +625,10 @@ jobs:
         vars: configuration
       params:
         CONFIG_FILE: foundations/((foundation))/products/download-antivirus.yml
-        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
         SOURCE: s3
       output_mapping:
         downloaded-product: antivirus-product
@@ -656,7 +674,10 @@ jobs:
         vars: configuration
       params:
         CONFIG_FILE: foundations/((foundation))/products/download-antivirus-mirror.yml
-        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
         SOURCE: s3
       output_mapping:
         downloaded-product: antivirus-mirror-product
@@ -702,7 +723,10 @@ jobs:
         vars: configuration
       params:
         CONFIG_FILE: foundations/((foundation))/products/download-mysql.yml
-        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
         SOURCE: s3
       output_mapping:
         downloaded-product: mysql-product
@@ -748,7 +772,10 @@ jobs:
         vars: configuration
       params:
         CONFIG_FILE: foundations/((foundation))/products/download-nsx-t.yml
-        VARS_FILES: vars/foundations/((foundation))/vars/versions.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
         SOURCE: s3
       output_mapping:
         downloaded-product: nsx-t-product
