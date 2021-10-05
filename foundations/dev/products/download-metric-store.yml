@@ -2,7 +2,7 @@
 pivnet-product-slug: p-metric-store
 
 file-glob: "metric-store-*.pivotal"
-product-version: ((versions.metric-store))
+product-version: ((versions.metric-store.dev))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))
