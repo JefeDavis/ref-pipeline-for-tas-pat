@@ -20,7 +20,7 @@ versions:
     download-regexp: ^2\.1\..*$
     dev: 2.1.5
     prod:
-  harbor-container-registry:
+  harbor-registry:
     download-regexp: ^2\.3\..*$
     dev: 2.3.2
     prod:
