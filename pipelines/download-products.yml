@@ -46,7 +46,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: products\[p-clamav-addon,(.*)\]p-antivirus-.*.pivotal
+    regexp: products/\[p-clamav-addon,(.*)\]p-antivirus-.*.pivotal
 
 - name: antivirus-stemcell
   type: s3
@@ -56,7 +56,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: stemcells\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
+    regexp: stemcells/\[stemcells-ubuntu-xenial,(.*)\]bosh-stemcell-.*-vsphere.*\.tgz
 
 - name: antivirus-mirror-product
   type: s3
