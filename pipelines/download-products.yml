@@ -395,7 +395,9 @@ prepare-tasks-with-secrets: &prepare-tasks-with-secrets
   file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
   params:
     CONFIG_PATHS: config/download-product-pivnet
-    VARS_PATHS: vars/foundations/vars/global.yml
+    VARS_PATHS: | 
+      vars/foundations/vars/global.yml
+      vars/foundations/vars/versions.yml
   input_mapping:
     tasks: platform-automation-tasks
     config: configuration
