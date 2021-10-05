@@ -1238,5 +1238,5 @@ jobs:
         do:
         - put: state
           params:
-            file: generated-state/state.yml
+            file: generated-state/state-*.yml
 # The previous line helps maintain current documentation at http://docs.pivotal.io.
