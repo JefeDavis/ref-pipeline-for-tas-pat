@@ -2,7 +2,7 @@
 versions:
   antivirus: 2.3.10
   compliance-scanner: 1.2.49
-  fim: 2.1.5
+  file-integrity-monitoring: 2.1.5
   healthwatch: 2.1.4
   mysql: 2.10.4
   nsx-t: 3.1.2.4
