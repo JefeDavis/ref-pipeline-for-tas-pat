@@ -16,7 +16,7 @@ resources:
     bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: \[ops-manager,(.*)\]ops-manager-vsphere.*.ova
+    regexp: products/\[ops-manager,(.*)\]ops-manager-vsphere.*.ova
 
 - name: tkgi-product
   type: s3
