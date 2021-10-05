@@ -9,4 +9,5 @@ s3-secret-access-key: ((s3_access_key.password))
 s3-bucket: ((s3_installation_bucket))
 s3-region-name: ((s3_region_name))
 s3-endpoint: ((s3_endpoint))
+s3-product-path: products
 
