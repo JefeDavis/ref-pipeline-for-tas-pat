@@ -304,7 +304,7 @@ jobs:
     params:
       ENV_FILE: foundations/config/env.yml
       OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
-      STATE_FILE: state-*.yml
+      STATE_FILE: state-$timestamp.yml
       INSTALLATION_FILE: ((foundation))-installation*.zip
       VARS_FILES: |
         vars/foundations/((foundation))/vars/director.yml
