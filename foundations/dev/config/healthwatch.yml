@@ -43,7 +43,7 @@ network-properties:
   - name: ((availability_zone))2
   - name: ((availability_zone))3
   singleton_availability_zone:
-    name: (((availability_zone))1
+    name: ((availability_zone))1
 resource-config:
   grafana:
     max_in_flight: 5
