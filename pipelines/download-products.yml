@@ -537,7 +537,7 @@ jobs:
     image: platform-automation-image
     file: platform-automation-tasks/tasks/download-product.yml
     params:
-      CONFIG_FILE: download-product-pivnet/download-fim.yml
+      CONFIG_FILE: download-product-pivnet/download-file-integrity-monitoring.yml
       VARS_FILES: vars/foundations/vars/global.yml
     input_mapping:
       config: configuration
