@@ -2,7 +2,7 @@
 pivnet-product-slug: p-spring-cloud-services
 
 file-glob: "p_spring-cloud-services-*.pivotal"
-product-version: ((versions.spring-cloud-services((foundation))))
+product-version: ((versions.spring-cloud-services.((foundation))))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))

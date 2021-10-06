@@ -2,7 +2,7 @@
 pivnet-product-slug: pivotal_single_sign-on_service
 
 file-glob: "Pivotal_Single_Sign-On_Service_*.pivotal"
-product-version: ((versions.sso((foundation))))
+product-version: ((versions.sso.((foundation))))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))

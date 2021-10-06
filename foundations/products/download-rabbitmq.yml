@@ -2,7 +2,7 @@
 pivnet-product-slug: p-rabbitmq
 
 file-glob: "p-rabbitmq-*.pivotal"
-product-version: ((versions.rabbitmq((foundation))))
+product-version: ((versions.rabbitmq.((foundation))))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))

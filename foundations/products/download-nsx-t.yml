@@ -2,7 +2,7 @@
 pivnet-product-slug: vmware-nsx-t
 
 file-glob: "VMware-NSX-T-*.pivotal"
-product-version: ((versions.nsx-t((foundation))))
+product-version: ((versions.nsx-t.((foundation))))
 
 s3-access-key-id: ((s3_access_key.username))
 s3-secret-access-key: ((s3_access_key.password))
