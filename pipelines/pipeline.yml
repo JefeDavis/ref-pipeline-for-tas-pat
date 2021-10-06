@@ -617,7 +617,7 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "apply-antivirus-mirror-changes" ]
+          passed: [ "stage-and-configure-antivirus-mirror" ]
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -906,7 +906,7 @@ jobs:
         vars/foundations/((foundation))/vars/vars.yml
         vars/foundations/vars/global.yml
 
-- name: configure-antivirus-mirror
+- name: stage-and-configure-antivirus-mirror
   serial: true
   serial_groups: [ install ]
   plan:
@@ -914,8 +914,7 @@ jobs:
     - get: platform-automation-image
       params:
         unpack: true
-      passed:
-      - download-upload-and-stage-antivirus-mirror
+      passed: [ "upgrade-opsman" ]
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -925,6 +924,38 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
+  - task: download-antivirus-mirror
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/((foundation))/products/download-antivirus-mirror.yml
+      VARS_FILES: |
+        vars/foundations/vars/versions.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: antivirus-mirror-product
+      downloaded-stemcell: antivirus-mirror-stemcell
+  - task: upload-and-stage-antivirus-mirror
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+    input_mapping:
+      product: antivirus-mirror-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: upload-antivirus-mirror-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: antivirus-mirror-stemcell
+    params:
+      ENV_FILE: foundations/config/env.yml
   - task: configure-antivirus-mirror
     image: platform-automation-image
     file: platform-automation-tasks/tasks/configure-product.yml
@@ -939,6 +970,39 @@ jobs:
         vars/foundations/((foundation))/vars/antivirus-mirror.yml
         vars/foundations/((foundation))/vars/vars.yml
         vars/foundations/vars/global.yml
+  - task: pre-deploy-check
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/pre-deploy-check.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: apply-product-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: check-pending-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/check-pending-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
 
 - name: configure-mysql
   serial: true
@@ -1109,59 +1173,6 @@ jobs:
           vars/foundations/((foundation))/vars/nsx-t.yml
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
-
-- name: apply-antivirus-mirror-changes
-  serial: true
-  serial_groups: [ install ]
-  plan:
-  - in_parallel:
-    - get: platform-automation-image
-      params:
-        unpack: true
-      passed:
-        - configure-antivirus-mirror
-      trigger: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  - task: pre-deploy-check
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/pre-deploy-check.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: apply-product-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/apply-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: check-pending-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/check-pending-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      ALLOW_PENDING_CHANGES: true
-  - task: export-installation
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/export-installation.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
-  - put: installation
-    params:
-      file: installation/((foundation))-installation*.zip
 
 - name: apply-antivirus-changes
   serial: true
