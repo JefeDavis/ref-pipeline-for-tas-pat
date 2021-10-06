@@ -354,7 +354,10 @@ jobs:
         params:
           unpack: true
         trigger: true
-        passed: [ "apply-compliance-scanner-and-fim-changes" ]
+        passed: 
+          - "stage-and-configure-antivirus"
+          - "stage-and-configure-compliance-scanner"
+          - "stage-and-configure-file-integrity-monitoring"
       - get: platform-automation-tasks
         params:
           unpack: true
@@ -405,7 +408,10 @@ jobs:
         params:
           unpack: true
         trigger: true
-        passed: [ "apply-compliance-scanner-and-fim-changes" ]
+        passed: 
+          - "stage-and-configure-antivirus"
+          - "stage-and-configure-compliance-scanner"
+          - "stage-and-configure-file-integrity-monitoring"
       - get: platform-automation-tasks
         params:
           unpack: true
@@ -464,7 +470,10 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "apply-compliance-scanner-and-fim-changes" ]
+          passed: 
+            - "stage-and-configure-antivirus"
+            - "stage-and-configure-compliance-scanner"
+            - "stage-and-configure-file-integrity-monitoring"
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -503,108 +512,6 @@ jobs:
       input_mapping:
         env: configuration
         stemcell: healthwatch-stemcell
-      params:
-        ENV_FILE: foundations/config/env.yml
-
-- name: download-upload-and-stage-compliance-scanner
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: [ "apply-antivirus-changes" ]
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-compliance-scanner
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-compliance-scanner.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: compliance-scanner-product
-        downloaded-stemcell: compliance-scanner-stemcell
-    - task: upload-and-stage-compliance-scanner
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: compliance-scanner-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-compliance-scanner-stemcell
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-stemcell.yml
-      input_mapping:
-        env: configuration
-        stemcell: compliance-scanner-stemcell
-      params:
-        ENV_FILE: foundations/config/env.yml
-
-- name: download-upload-and-stage-file-integrity-monitoring
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: [ "apply-antivirus-changes" ]
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-file-integrity-monitoring
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-file-integrity-monitoring.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: file-integrity-monitoring-product
-        downloaded-stemcell: file-integrity-monitoring-stemcell
-    - task: upload-and-stage-file-integrity-monitoring
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: file-integrity-monitoring-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-file-integrity-monitoring-stemcell
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-stemcell.yml
-      input_mapping:
-        env: configuration
-        stemcell: file-integrity-monitoring-stemcell
       params:
         ENV_FILE: foundations/config/env.yml
 
@@ -668,7 +575,10 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "apply-compliance-scanner-and-fim-changes" ]
+          passed: 
+            - "stage-and-configure-antivirus"
+            - "stage-and-configure-compliance-scanner"
+            - "stage-and-configure-file-integrity-monitoring"
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -719,7 +629,10 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "apply-compliance-scanner-and-fim-changes" ]
+          passed: 
+            - "stage-and-configure-antivirus"
+            - "stage-and-configure-compliance-scanner"
+            - "stage-and-configure-file-integrity-monitoring"
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -753,7 +666,7 @@ jobs:
       params:
         ENV_FILE: foundations/config/env.yml
 
-- name: configure-compliance-scanner
+- name: stage-and-configure-compliance-scanner
   serial: true
   serial_groups: [ install ]
   plan:
@@ -761,8 +674,7 @@ jobs:
     - get: platform-automation-image
       params:
         unpack: true
-      passed:
-      - download-upload-and-stage-compliance-scanner
+      passed: [ "stage-and-configure-antivirus-mirror" ]
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -772,22 +684,67 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
-  - task: configure-compliance-scanner
+  - task: download-compliance-scanner
     image: platform-automation-image
-    file: platform-automation-tasks/tasks/configure-product.yml
+    file: platform-automation-tasks/tasks/download-product.yml
     input_mapping:
       config: configuration
-      env: configuration
       vars: configuration
     params:
-      CONFIG_FILE: foundations/((foundation))/config/compliance-scanner.yml
+      CONFIG_FILE: foundations/((foundation))/products/download-compliance-scanner.yml
+      VARS_FILES: |
+        vars/foundations/vars/versions.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: compliance-scanner-product
+      downloaded-stemcell: compliance-scanner-stemcell
+  - task: upload-compliance-scanner-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: compliance-scanner-product
+      env: configuration
+    params:
       ENV_FILE: foundations/config/env.yml
+  - task: upload-compliance-scanner-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: compliance-scanner-stemcell
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: stage-configure-apply-compliance-scanner
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-configure-apply.yml
+    input_mapping:
+      product: compliance-scanner-product
+      env: configuration
+      config: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      CONFIG_FILE: foundations/((foundation))/config/compliance-scanner.yml
       VARS_FILES: |
         vars/foundations/((foundation))/vars/compliance-scanner.yml
         vars/foundations/((foundation))/vars/vars.yml
         vars/foundations/vars/global.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
 
-- name: configure-file-integrity-monitoring
+- name: stage-and-configure-file-integrity-monitoring
   serial: true
   serial_groups: [ install ]
   plan:
@@ -795,8 +752,7 @@ jobs:
     - get: platform-automation-image
       params:
         unpack: true
-      passed:
-      - download-upload-and-stage-file-integrity-monitoring
+      passed: [ "stage-and-configure-antivirus-mirror" ]
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -806,22 +762,67 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
-  - task: configure-file-integrity-monitoring
+  - task: download-file-integrity-monitoring
     image: platform-automation-image
-    file: platform-automation-tasks/tasks/configure-product.yml
+    file: platform-automation-tasks/tasks/download-product.yml
     input_mapping:
       config: configuration
-      env: configuration
       vars: configuration
     params:
-      CONFIG_FILE: foundations/((foundation))/config/file-integrity-monitoring.yml
+      CONFIG_FILE: foundations/((foundation))/products/download-file-integrity-monitoring.yml
+      VARS_FILES: |
+        vars/foundations/vars/versions.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: file-integrity-monitoring-product
+      downloaded-stemcell: file-integrity-monitoring-stemcell
+  - task: upload-file-integrity-monitoring-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: file-integrity-monitoring-product
+      env: configuration
+    params:
       ENV_FILE: foundations/config/env.yml
+  - task: upload-file-integrity-monitoring-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: file-integrity-monitoring-stemcell
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: stage-configure-apply-file-integrity-monitoring
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-configure-apply.yml
+    input_mapping:
+      product: file-integrity-monitoring-product
+      env: configuration
+      config: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      CONFIG_FILE: foundations/((foundation))/config/file-integrity-monitoring.yml
       VARS_FILES: |
         vars/foundations/((foundation))/vars/file-integrity-monitoring.yml
         vars/foundations/((foundation))/vars/vars.yml
         vars/foundations/vars/global.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
 
-- name: configure-antivirus
+- name: stage-and-configure-antivirus
   serial: true
   serial_groups: [ install ]
   plan:
@@ -829,8 +830,7 @@ jobs:
     - get: platform-automation-image
       params:
         unpack: true
-      passed:
-      - download-upload-and-stage-antivirus
+      passed: [ "stage-and-configure-antivirus-mirror" ]
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -840,20 +840,65 @@ jobs:
     <<: *prepare-tasks-with-secrets
   - task: prepare-image
     <<: *prepare-image
-  - task: configure-antivirus
+  - task: download-antivirus
     image: platform-automation-image
-    file: platform-automation-tasks/tasks/configure-product.yml
+    file: platform-automation-tasks/tasks/download-product.yml
     input_mapping:
       config: configuration
-      env: configuration
       vars: configuration
     params:
-      CONFIG_FILE: foundations/((foundation))/config/antivirus.yml
+      CONFIG_FILE: foundations/((foundation))/products/download-antivirus.yml
+      VARS_FILES: |
+        vars/foundations/vars/versions.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: antivirus-product
+      downloaded-stemcell: antivirus-stemcell
+  - task: upload-antivirus-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: antivirus-product
+      env: configuration
+    params:
       ENV_FILE: foundations/config/env.yml
+  - task: upload-antivirus-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: antivirus-stemcell
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: stage-configure-apply-antivirus
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-configure-apply.yml
+    input_mapping:
+      product: antivirus-product
+      env: configuration
+      config: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      CONFIG_FILE: foundations/((foundation))/config/antivirus.yml
       VARS_FILES: |
         vars/foundations/((foundation))/vars/antivirus.yml
         vars/foundations/((foundation))/vars/vars.yml
         vars/foundations/vars/global.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
 
 - name: stage-and-configure-antivirus-mirror
   serial: true
@@ -1102,113 +1147,6 @@ jobs:
           vars/foundations/((foundation))/vars/nsx-t.yml
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
-
-- name: apply-antivirus-changes
-  serial: true
-  serial_groups: [ install ]
-  plan:
-  - in_parallel:
-    - get: platform-automation-image
-      params:
-        unpack: true
-      passed:
-        - configure-antivirus
-      trigger: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  - task: pre-deploy-check
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/pre-deploy-check.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: apply-product-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/apply-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: check-pending-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/check-pending-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      ALLOW_PENDING_CHANGES: true
-  - task: export-installation
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/export-installation.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
-  - put: installation
-    params:
-      file: installation/((foundation))-installation*.zip
-
-- name: apply-compliance-scanner-and-fim-changes
-  serial: true
-  serial_groups: [ install ]
-  plan:
-  - in_parallel:
-    - get: platform-automation-image
-      params:
-        unpack: true
-      passed:
-        - configure-compliance-scanner
-        - configure-file-integrity-monitoring
-      trigger: true
-    - get: platform-automation-tasks
-      params:
-        unpack: true
-    - get: configuration
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  - task: pre-deploy-check
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/pre-deploy-check.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: apply-product-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/apply-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: check-pending-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/check-pending-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      ALLOW_PENDING_CHANGES: true
-  - task: export-installation
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/export-installation.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
-  - put: installation
-    params:
-      file: installation/((foundation))-installation*.zip
 
 - name: apply-product-changes
   serial: true
