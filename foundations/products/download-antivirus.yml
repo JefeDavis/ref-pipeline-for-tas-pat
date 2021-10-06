@@ -1,8 +1,8 @@
 ---
-pivnet-product-slug: harbor-container-registry
+pivnet-product-slug: p-clamav-addon
 
-file-glob: "harbor-container-registry-*.pivotal"
-product-version: ((versions.harbor-registry.dev))
+file-glob: "p-antivirus-[0-9]*.pivotal"
+product-version: ((versions.antivirus.((foundation))))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))

@@ -1,8 +1,8 @@
 ---
-pivnet-product-slug: pivotal_single_sign-on_service
+pivnet-product-slug: p-redis
 
-file-glob: "Pivotal_Single_Sign-On_Service_*.pivotal"
-product-version: ((versions.sso.dev))
+file-glob: "p-redis-*.pivotal"
+product-version: ((versions.redis((foundation))))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))

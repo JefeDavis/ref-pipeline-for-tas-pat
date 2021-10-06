@@ -1,9 +1,8 @@
-
 ---
-pivnet-product-slug: pivotal-container-service
+pivnet-product-slug: harbor-container-registry
 
-file-glob: "pivotal-container-service*.pivotal"
-product-version: ((versions.tkgi.dev))
+file-glob: "harbor-container-registry-*.pivotal"
+product-version: ((versions.harbor-registry((foundation))))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))
@@ -13,4 +12,4 @@ s3-region-name: ((s3_region_name))
 s3-stemcell-path: stemcells
 s3-product-path: products
 s3-endpoint: ((s3_endpoint))
-  #
+
