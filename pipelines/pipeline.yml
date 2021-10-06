@@ -659,57 +659,6 @@ jobs:
       params:
         ENV_FILE: foundations/config/env.yml
 
-- name: download-upload-and-stage-antivirus-mirror
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: [ "upgrade-opsman" ]
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-antivirus-mirror
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-antivirus-mirror.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: antivirus-mirror-product
-        downloaded-stemcell: antivirus-mirror-stemcell
-    - task: upload-and-stage-antivirus-mirror
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: antivirus-mirror-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-antivirus-mirror-stemcell
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-stemcell.yml
-      input_mapping:
-        env: configuration
-        stemcell: antivirus-mirror-stemcell
-      params:
-        ENV_FILE: foundations/config/env.yml
-
 - name: download-upload-and-stage-mysql
   serial: true
   serial_groups: [ products ]
