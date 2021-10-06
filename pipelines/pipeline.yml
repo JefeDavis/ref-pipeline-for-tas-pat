@@ -770,7 +770,7 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "apply-compliance-scanner-and-file-changes" ]
+          passed: [ "apply-compliance-scanner-and-fim-changes" ]
         - get: platform-automation-tasks
           params:
             unpack: true
