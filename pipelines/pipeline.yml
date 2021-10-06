@@ -1011,7 +1011,7 @@ jobs:
       - stage-and-configure-nsx-t
       - stage-and-configure-healthwatch
       - stage-and-configure-mysql
-      trigger: false
+      trigger: true
     - get: platform-automation-tasks
       params:
         unpack: true
