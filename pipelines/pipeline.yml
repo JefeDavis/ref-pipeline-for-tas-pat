@@ -139,7 +139,7 @@ jobs:
     params:
       CONFIG_FILE: foundations/products/download-opsman.yml
       VARS_FILES: |
-        vars/foundations/((foundation))/var/vars.yml
+        vars/foundations/((foundation))/vars/vars.yml
         vars/foundations/vars/versions.yml 
         vars/foundations/vars/global.yml
       SOURCE: s3
