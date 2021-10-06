@@ -354,7 +354,7 @@ jobs:
         params:
           unpack: true
         trigger: true
-        passed: [ "apply-antivirus-compliance-nsxt-nsxt-changes" ]
+        passed: [ "apply-compliance-scanner-and-fim-changes" ]
       - get: platform-automation-tasks
         params:
           unpack: true
@@ -405,7 +405,7 @@ jobs:
         params:
           unpack: true
         trigger: true
-        passed: [ "apply-antivirus-compliance-nsxt-nsxt-changes" ]
+        passed: [ "apply-compliance-scanner-and-fim-changes" ]
       - get: platform-automation-tasks
         params:
           unpack: true
@@ -464,7 +464,7 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "apply-antivirus-compliance-nsxt-nsxt-changes" ]
+          passed: [ "apply-compliance-scanner-and-fim-changes" ]
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -515,7 +515,7 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "upgrade-opsman" ]
+          passed: [ "apply-antivirus-changes" ]
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -566,7 +566,7 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "apply-antivirus-compliance-nsxt-nsxt-changes" ]
+          passed: [ "apply-antivirus-changes" ]
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -719,7 +719,7 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "apply-antivirus-compliance-nsxt-nsxt-changes" ]
+          passed: [ "apply-compliance-scanner-and-fim-changes" ]
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -770,7 +770,7 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "upgrade-opsman" ]
+          passed: [ "apply-compliance-scanner-and-file-changes" ]
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -1110,7 +1110,7 @@ jobs:
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
 
-- name: apply-antivirus-compliance-nsxt-nsxt-changes
+- name: apply-antivirus-changes
   serial: true
   serial_groups: [ install ]
   plan:
@@ -1119,10 +1119,62 @@ jobs:
       params:
         unpack: true
       passed:
-        - configure-nsx-t
         - configure-antivirus
         - configure-antivirus-mirror
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: pre-deploy-check
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/pre-deploy-check.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: apply-product-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: check-pending-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/check-pending-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: apply-compliance-scanner-and-fim-changes
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      passed:
         - configure-compliance-scanner
+        - configure-file-integrity-monitoring
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -1177,8 +1229,8 @@ jobs:
       passed:
       - configure-tkgi
       - configure-tas
+      - configure-nsx-t
       - configure-healthwatch
-      - configure-file-integrity-monitoring
       - configure-mysql
       trigger: false
     - get: platform-automation-tasks
