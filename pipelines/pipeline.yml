@@ -889,6 +889,22 @@ jobs:
     output_mapping:
       downloaded-product: antivirus-mirror-product
       downloaded-stemcell: antivirus-mirror-stemcell
+  - task: upload-antivirus-mirror-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: antivirus-mirror-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: upload-antivirus-mirror-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: antivirus-mirror-stemcell
+    params:
+      ENV_FILE: foundations/config/env.yml
   - task: stage-configure-apply-antivirus-mirror
     image: platform-automation-image
     file: platform-automation-tasks/tasks/stage-configure-apply.yml
@@ -896,7 +912,6 @@ jobs:
       product: antivirus-mirror-product
       env: configuration
       config: configuration
-      assign-stemcell-config: downloaded-stemcell
     params:
       ENV_FILE: foundations/config/env.yml
       CONFIG_FILE: foundations/((foundation))/config/antivirus-mirror.yml
