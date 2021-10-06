@@ -617,7 +617,7 @@ jobs:
           params:
             unpack: true
           trigger: true
-          passed: [ "upgrade-opsman" ]
+          passed: [ "apply-antivirus-mirror-changes" ]
         - get: platform-automation-tasks
           params:
             unpack: true
@@ -1110,6 +1110,59 @@ jobs:
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
 
+- name: apply-antivirus-mirror-changes
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      passed:
+        - configure-antivirus-mirror
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: pre-deploy-check
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/pre-deploy-check.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: apply-product-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: check-pending-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/check-pending-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
 - name: apply-antivirus-changes
   serial: true
   serial_groups: [ install ]
@@ -1120,7 +1173,6 @@ jobs:
         unpack: true
       passed:
         - configure-antivirus
-        - configure-antivirus-mirror
       trigger: true
     - get: platform-automation-tasks
       params:
