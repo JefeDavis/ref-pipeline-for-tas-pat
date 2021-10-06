@@ -345,277 +345,7 @@ jobs:
     params:
       file: installation/((foundation))-installation*.zip
 
-- name: download-upload-and-stage-tkgi
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-        trigger: true
-        passed: 
-          - "stage-and-configure-antivirus"
-          - "stage-and-configure-compliance-scanner"
-          - "stage-and-configure-file-integrity-monitoring"
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-tkgi
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-tkgi.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: tkgi-product
-        downloaded-stemcell: tkgi-stemcell
-    - task: upload-and-stage-tkgi
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: tkgi-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-tkgi-stemcell
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-stemcell.yml
-      input_mapping:
-        env: configuration
-        stemcell: tkgi-stemcell
-      params:
-        ENV_FILE: foundations/config/env.yml
-
-- name: download-upload-and-stage-tas
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-        trigger: true
-        passed: 
-          - "stage-and-configure-antivirus"
-          - "stage-and-configure-compliance-scanner"
-          - "stage-and-configure-file-integrity-monitoring"
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-tas
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-tas.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: tas-product
-        downloaded-stemcell: tas-stemcell
-    - task: upload-tas-product
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-product.yml
-      input_mapping:
-        product: tas-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-tas-stemcell
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-stemcell.yml
-      input_mapping:
-        env: configuration
-        stemcell: tas-stemcell
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-and-stage-tas
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/stage-product.yml
-      input_mapping:
-        product: tas-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-
-- name: download-upload-and-stage-healthwatch
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: 
-            - "stage-and-configure-antivirus"
-            - "stage-and-configure-compliance-scanner"
-            - "stage-and-configure-file-integrity-monitoring"
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-healthwatch
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-healthwatch.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: healthwatch-product
-        downloaded-stemcell: healthwatch-stemcell
-    - task: upload-and-stage-healthwatch
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: healthwatch-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-healthwatch-stemcell
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-stemcell.yml
-      input_mapping:
-        env: configuration
-        stemcell: healthwatch-stemcell
-      params:
-        ENV_FILE: foundations/config/env.yml
-
-- name: download-upload-and-stage-mysql
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: 
-            - "stage-and-configure-antivirus"
-            - "stage-and-configure-compliance-scanner"
-            - "stage-and-configure-file-integrity-monitoring"
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-mysql
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-mysql.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: mysql-product
-        downloaded-stemcell: mysql-stemcell
-    - task: upload-and-stage-mysql
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: mysql-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-mysql-stemcell
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-stemcell.yml
-      input_mapping:
-        env: configuration
-        stemcell: mysql-stemcell
-      params:
-        ENV_FILE: foundations/config/env.yml
-
-- name: download-upload-and-stage-nsx-t
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: 
-            - "stage-and-configure-antivirus"
-            - "stage-and-configure-compliance-scanner"
-            - "stage-and-configure-file-integrity-monitoring"
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-nsx-t
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-nsx-t.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: nsx-t-product
-        downloaded-stemcell: nsx-t-stemcell
-    - task: upload-and-stage-nsx-t
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: nsx-t-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-
-- name: stage-and-configure-compliance-scanner
+- name: stage-configure-and-apply-compliance-scanner
   serial: true
   serial_groups: [ install ]
   plan:
@@ -623,7 +353,7 @@ jobs:
     - get: platform-automation-image
       params:
         unpack: true
-      passed: [ "stage-and-configure-antivirus-mirror" ]
+      passed: [ "stage-configure-and-apply-antivirus-mirror" ]
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -693,7 +423,7 @@ jobs:
     params:
       file: installation/((foundation))-installation*.zip
 
-- name: stage-and-configure-file-integrity-monitoring
+- name: stage-configure-and-apply-file-integrity-monitoring
   serial: true
   serial_groups: [ install ]
   plan:
@@ -701,7 +431,7 @@ jobs:
     - get: platform-automation-image
       params:
         unpack: true
-      passed: [ "stage-and-configure-antivirus-mirror" ]
+      passed: [ "stage-configure-and-apply-antivirus-mirror" ]
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -771,7 +501,7 @@ jobs:
     params:
       file: installation/((foundation))-installation*.zip
 
-- name: stage-and-configure-antivirus
+- name: stage-configure-and-apply-antivirus
   serial: true
   serial_groups: [ install ]
   plan:
@@ -779,7 +509,7 @@ jobs:
     - get: platform-automation-image
       params:
         unpack: true
-      passed: [ "stage-and-configure-antivirus-mirror" ]
+      passed: [ "stage-configure-and-apply-antivirus-mirror" ]
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -849,7 +579,7 @@ jobs:
     params:
       file: installation/((foundation))-installation*.zip
 
-- name: stage-and-configure-antivirus-mirror
+- name: stage-configure-and-apply-antivirus-mirror
   serial: true
   serial_groups: [ install ]
   plan:
@@ -927,51 +657,87 @@ jobs:
     params:
       file: installation/((foundation))-installation*.zip
 
-- name: configure-mysql
+- name: stage-and-configure-mysql
   serial: true
-  serial_groups: [ install ]
+  serial_groups: [ products ]
   plan:
-  - in_parallel:
-    - get: platform-automation-image
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-mysql
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
       params:
-        unpack: true
-      passed:
-      - download-upload-and-stage-mysql
-      trigger: true
-    - get: platform-automation-tasks
+        CONFIG_FILE: foundations/((foundation))/products/download-mysql.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: mysql-product
+        downloaded-stemcell: mysql-stemcell
+    - task: upload-and-stage-mysql
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: mysql-product
+        env: configuration
       params:
-        unpack: true
-    - get: configuration
-  - task: prepare-tasks-with-secrets
-    <<: *prepare-tasks-with-secrets
-  - task: prepare-image
-    <<: *prepare-image
-  - task: configure-mysql
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/configure-product.yml
-    input_mapping:
-      config: configuration
-      env: configuration
-      vars: configuration
-    params:
-      CONFIG_FILE: foundations/((foundation))/config/mysql.yml
-      ENV_FILE: foundations/config/env.yml
-      VARS_FILES: |
-        vars/foundations/((foundation))/vars/mysql.yml
-        vars/foundations/((foundation))/vars/vars.yml
-        vars/foundations/vars/global.yml
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-mysql-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: mysql-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-mysql
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/mysql.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/mysql.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
 
-- name: configure-tas
+- name: stage-and-configure-tas
   serial: true
-  serial_groups: [ install ]
+  serial_groups: [ products ]
   plan:
     - in_parallel:
       - get: platform-automation-image
         params:
           unpack: true
-        passed:
-          - download-upload-and-stage-tas
         trigger: true
+        passed: 
+          - "stage-configure-and-apply-antivirus"
+          - "stage-configure-and-apply-compliance-scanner"
+          - "stage-configure-and-apply-file-integrity-monitoring"
       - get: platform-automation-tasks
         params:
           unpack: true
@@ -980,6 +746,46 @@ jobs:
       <<: *prepare-tasks-with-secrets
     - task: prepare-image
       <<: *prepare-image
+    - task: download-tas
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/products/download-tas.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: tas-product
+        downloaded-stemcell: tas-stemcell
+    - task: upload-tas-product
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-product.yml
+      input_mapping:
+        product: tas-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-tas-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: tas-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-and-stage-tas
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/stage-product.yml
+      input_mapping:
+        product: tas-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
     - task: configure-tas
       image: platform-automation-image
       file: platform-automation-tasks/tasks/configure-product.yml
@@ -995,17 +801,19 @@ jobs:
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
 
-- name: configure-tkgi
+- name: stage-and-configure-tkgi
   serial: true
-  serial_groups: [ install ]
+  serial_groups: [ products ]
   plan:
     - in_parallel:
       - get: platform-automation-image
         params:
           unpack: true
-        passed:
-          - download-upload-and-stage-tkgi
         trigger: true
+        passed: 
+          - "stage-configure-and-apply-antivirus"
+          - "stage-configure-and-apply-compliance-scanner"
+          - "stage-configure-and-apply-file-integrity-monitoring"
       - get: platform-automation-tasks
         params:
           unpack: true
@@ -1014,6 +822,38 @@ jobs:
       <<: *prepare-tasks-with-secrets
     - task: prepare-image
       <<: *prepare-image
+    - task: download-tkgi
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/products/download-tkgi.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: tkgi-product
+        downloaded-stemcell: tkgi-stemcell
+    - task: upload-and-stage-tkgi
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: tkgi-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-tkgi-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: tkgi-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
     - task: configure-tkgi
       image: platform-automation-image
       file: platform-automation-tasks/tasks/configure-product.yml
@@ -1029,25 +869,59 @@ jobs:
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
 
-- name: configure-healthwatch
+- name: stage-and-configure-healthwatch
   serial: true
-  serial_groups: [ install ]
+  serial_groups: [ products ]
   plan:
     - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-        passed:
-          - download-upload-and-stage-healthwatch
-        trigger: true
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: prepare-image
       <<: *prepare-image
+    - task: download-healthwatch
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/products/download-healthwatch.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: healthwatch-product
+        downloaded-stemcell: healthwatch-stemcell
+    - task: upload-and-stage-healthwatch
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: healthwatch-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-healthwatch-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: healthwatch-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
     - task: configure-healthwatch
       image: platform-automation-image
       file: platform-automation-tasks/tasks/configure-product.yml
@@ -1063,25 +937,51 @@ jobs:
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
 
-- name: configure-nsx-t
+- name: stage-and-configure-nsx-t
   serial: true
-  serial_groups: [ install ]
+  serial_groups: [ products ]
   plan:
     - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-        passed:
-          - download-upload-and-stage-nsx-t
-        trigger: true
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: prepare-image
       <<: *prepare-image
+    - task: download-nsx-t
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/products/download-nsx-t.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: nsx-t-product
+        downloaded-stemcell: nsx-t-stemcell
+    - task: upload-and-stage-nsx-t
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: nsx-t-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
     - task: configure-nsx-t
       image: platform-automation-image
       file: platform-automation-tasks/tasks/configure-product.yml
