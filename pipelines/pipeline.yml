@@ -1006,11 +1006,11 @@ jobs:
       params:
         unpack: true
       passed:
-      - configure-tkgi
-      - configure-tas
-      - configure-nsx-t
-      - configure-healthwatch
-      - configure-mysql
+      - stage-and-configure-tkgi
+      - stage-and-configure-tas
+      - stage-and-configure-nsx-t
+      - stage-and-configure-healthwatch
+      - stage-and-configure-mysql
       trigger: false
     - get: platform-automation-tasks
       params:
