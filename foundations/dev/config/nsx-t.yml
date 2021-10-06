@@ -29,7 +29,9 @@ product-properties:
   .properties.ncp_debug_log:
     value: false
   .properties.nsx_api_ca_cert:
-    value: ((nsxt_cert.certificate))
+    value: |
+     ((nsxt_cert.certificate))
+     ((nsxt_cert.ca)))
   .properties.nsx_api_managers:
     value: ((nsxt_manager_fqdn))
   .properties.nsx_auth:
