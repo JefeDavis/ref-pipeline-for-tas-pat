@@ -889,57 +889,21 @@ jobs:
     output_mapping:
       downloaded-product: antivirus-mirror-product
       downloaded-stemcell: antivirus-mirror-stemcell
-  - task: upload-and-stage-antivirus-mirror
+  - task: stage-configure-apply-antivirus-mirror
     image: platform-automation-image
-    file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+    file: platform-automation-tasks/tasks/stage-configure-apply.yml
     input_mapping:
       product: antivirus-mirror-product
       env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: upload-antivirus-mirror-stemcell
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/upload-stemcell.yml
-    input_mapping:
-      env: configuration
-      stemcell: antivirus-mirror-stemcell
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: configure-antivirus-mirror
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/configure-product.yml
-    input_mapping:
       config: configuration
-      env: configuration
-      vars: configuration
+      assign-stemcell-config: downloaded-stemcell
     params:
-      CONFIG_FILE: foundations/((foundation))/config/antivirus-mirror.yml
       ENV_FILE: foundations/config/env.yml
+      CONFIG_FILE: foundations/((foundation))/config/antivirus-mirror.yml
       VARS_FILES: |
         vars/foundations/((foundation))/vars/antivirus-mirror.yml
         vars/foundations/((foundation))/vars/vars.yml
         vars/foundations/vars/global.yml
-  - task: pre-deploy-check
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/pre-deploy-check.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: apply-product-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/apply-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
-  - task: check-pending-changes
-    image: platform-automation-image
-    file: platform-automation-tasks/tasks/check-pending-changes.yml
-    input_mapping:
-      env: configuration
-    params:
-      ENV_FILE: foundations/config/env.yml
       ALLOW_PENDING_CHANGES: true
   - task: export-installation
     image: platform-automation-image
