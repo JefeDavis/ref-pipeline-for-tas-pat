@@ -37,11 +37,11 @@ resources:
   type: s3
   source:
     access_key_id: ((s3_access_key.username))
-    bucket: ((s3_state_bucket))
+    bucket: ((s3_installation_bucket))
     region_name: ((s3_region_name))
     secret_access_key: ((s3_access_key.password))
-    regexp: ((foundation))/state-(.*).yml
-    initial_path: ((foundation))/state-0.0.0.yml
+    regexp: ((foundation))/state/state-(.*).yml
+    initial_path: ((foundation))/state/state-0.0.0.yml
     # versioned_file: ((foundation))/state/state.yml
     initial_content_text: '{}'
     # initial_version: 'empty-start'
