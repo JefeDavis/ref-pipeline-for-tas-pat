@@ -912,6 +912,7 @@ jobs:
       product: antivirus-mirror-product
       env: configuration
       config: configuration
+      vars: configuration
     params:
       ENV_FILE: foundations/config/env.yml
       CONFIG_FILE: foundations/((foundation))/config/antivirus-mirror.yml
