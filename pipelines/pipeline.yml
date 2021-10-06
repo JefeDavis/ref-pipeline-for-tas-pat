@@ -515,57 +515,6 @@ jobs:
       params:
         ENV_FILE: foundations/config/env.yml
 
-- name: download-upload-and-stage-antivirus
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: [ "stage-and-configure-antivirus-mirror" ]
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-antivirus
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/products/download-antivirus.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: antivirus-product
-        downloaded-stemcell: antivirus-stemcell
-    - task: upload-and-stage-antivirus
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: antivirus-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-antivirus-stemcell
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-stemcell.yml
-      input_mapping:
-        env: configuration
-        stemcell: antivirus-stemcell
-      params:
-        ENV_FILE: foundations/config/env.yml
-
 - name: download-upload-and-stage-mysql
   serial: true
   serial_groups: [ products ]
