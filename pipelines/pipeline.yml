@@ -345,6 +345,138 @@ jobs:
     params:
       file: installation/((foundation))-installation*.zip
 
+- name: stage-and-configure-tas
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+        trigger: true
+        passed: 
+          - upgrade-opsman
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-tas
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/products/download-tas.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: tas-product
+        downloaded-stemcell: tas-stemcell
+    - task: upload-tas-product
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-product.yml
+      input_mapping:
+        product: tas-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-tas-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: tas-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-and-stage-tas
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/stage-product.yml
+      input_mapping:
+        product: tas-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-tas
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/tas.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/tas.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
+- name: stage-and-configure-nsx-t
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - upgrade-opsman
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-nsx-t
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/products/download-nsx-t.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: nsx-t-product
+        downloaded-stemcell: nsx-t-stemcell
+    - task: upload-and-stage-nsx-t
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: nsx-t-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-nsx-t
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/nsx-t.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/nsx-t.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
 - name: stage-configure-and-apply-compliance-scanner
   serial: true
   serial_groups: [ install ]
@@ -587,7 +719,7 @@ jobs:
     - get: platform-automation-image
       params:
         unpack: true
-      passed: [ "upgrade-opsman" ]
+      passed: [ "apply-tas-and-nsx-t-changes" ]
       trigger: true
     - get: platform-automation-tasks
       params:
@@ -725,68 +857,60 @@ jobs:
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
 
-- name: stage-and-configure-tas
+- name: stage-and-configure-healthwatch
   serial: true
   serial_groups: [ products ]
   plan:
     - in_parallel:
-      - get: platform-automation-image
-        params:
-          unpack: true
-        trigger: true
-        passed: 
-          - "stage-configure-and-apply-antivirus"
-          - "stage-configure-and-apply-compliance-scanner"
-          - "stage-configure-and-apply-file-integrity-monitoring"
-      - get: platform-automation-tasks
-        params:
-          unpack: true
-      - get: configuration
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
     - task: prepare-tasks-with-secrets
       <<: *prepare-tasks-with-secrets
     - task: prepare-image
       <<: *prepare-image
-    - task: download-tas
+    - task: download-healthwatch
       image: platform-automation-image
       file: platform-automation-tasks/tasks/download-product.yml
       input_mapping:
         config: configuration
         vars: configuration
       params:
-        CONFIG_FILE: foundations/products/download-tas.yml
+        CONFIG_FILE: foundations/products/download-healthwatch.yml
         VARS_FILES: |
           vars/foundations/vars/versions.yml
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
         SOURCE: s3
       output_mapping:
-        downloaded-product: tas-product
-        downloaded-stemcell: tas-stemcell
-    - task: upload-tas-product
+        downloaded-product: healthwatch-product
+        downloaded-stemcell: healthwatch-stemcell
+    - task: upload-and-stage-healthwatch
       image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-product.yml
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
       input_mapping:
-        product: tas-product
+        product: healthwatch-product
         env: configuration
       params:
         ENV_FILE: foundations/config/env.yml
-    - task: upload-tas-stemcell
+    - task: upload-healthwatch-stemcell
       image: platform-automation-image
       file: platform-automation-tasks/tasks/upload-stemcell.yml
       input_mapping:
         env: configuration
-        stemcell: tas-stemcell
+        stemcell: healthwatch-stemcell
       params:
         ENV_FILE: foundations/config/env.yml
-    - task: upload-and-stage-tas
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/stage-product.yml
-      input_mapping:
-        product: tas-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: configure-tas
+    - task: configure-healthwatch
       image: platform-automation-image
       file: platform-automation-tasks/tasks/configure-product.yml
       input_mapping:
@@ -794,10 +918,10 @@ jobs:
         env: configuration
         vars: configuration
       params:
-        CONFIG_FILE: foundations/((foundation))/config/tas.yml
+        CONFIG_FILE: foundations/((foundation))/config/healthwatch.yml
         ENV_FILE: foundations/config/env.yml
         VARS_FILES: |
-          vars/foundations/((foundation))/vars/tas.yml
+          vars/foundations/((foundation))/vars/healthwatch.yml
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
 
@@ -869,133 +993,59 @@ jobs:
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
 
-- name: stage-and-configure-healthwatch
+- name: apply-tas-and-nsx-t-changes
   serial: true
-  serial_groups: [ products ]
+  serial_groups: [ install ]
   plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: 
-            - "stage-configure-and-apply-antivirus"
-            - "stage-configure-and-apply-compliance-scanner"
-            - "stage-configure-and-apply-file-integrity-monitoring"
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-healthwatch
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
+  - in_parallel:
+    - get: platform-automation-image
       params:
-        CONFIG_FILE: foundations/products/download-healthwatch.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: healthwatch-product
-        downloaded-stemcell: healthwatch-stemcell
-    - task: upload-and-stage-healthwatch
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: healthwatch-product
-        env: configuration
+        unpack: true
+      passed:
+      - stage-and-configure-tas
+      - stage-and-configure-nsx-t
+      trigger: true
+    - get: platform-automation-tasks
       params:
-        ENV_FILE: foundations/config/env.yml
-    - task: upload-healthwatch-stemcell
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-stemcell.yml
-      input_mapping:
-        env: configuration
-        stemcell: healthwatch-stemcell
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: configure-healthwatch
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/configure-product.yml
-      input_mapping:
-        config: configuration
-        env: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/config/healthwatch.yml
-        ENV_FILE: foundations/config/env.yml
-        VARS_FILES: |
-          vars/foundations/((foundation))/vars/healthwatch.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-
-- name: stage-and-configure-nsx-t
-  serial: true
-  serial_groups: [ products ]
-  plan:
-    - in_parallel:
-        - get: platform-automation-image
-          params:
-            unpack: true
-          trigger: true
-          passed: 
-            - "stage-configure-and-apply-antivirus"
-            - "stage-configure-and-apply-compliance-scanner"
-            - "stage-configure-and-apply-file-integrity-monitoring"
-        - get: platform-automation-tasks
-          params:
-            unpack: true
-        - get: configuration
-    - task: prepare-tasks-with-secrets
-      <<: *prepare-tasks-with-secrets
-    - task: prepare-image
-      <<: *prepare-image
-    - task: download-nsx-t
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/download-product.yml
-      input_mapping:
-        config: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/products/download-nsx-t.yml
-        VARS_FILES: |
-          vars/foundations/vars/versions.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
-        SOURCE: s3
-      output_mapping:
-        downloaded-product: nsx-t-product
-        downloaded-stemcell: nsx-t-stemcell
-    - task: upload-and-stage-nsx-t
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
-      input_mapping:
-        product: nsx-t-product
-        env: configuration
-      params:
-        ENV_FILE: foundations/config/env.yml
-    - task: configure-nsx-t
-      image: platform-automation-image
-      file: platform-automation-tasks/tasks/configure-product.yml
-      input_mapping:
-        config: configuration
-        env: configuration
-        vars: configuration
-      params:
-        CONFIG_FILE: foundations/((foundation))/config/nsx-t.yml
-        ENV_FILE: foundations/config/env.yml
-        VARS_FILES: |
-          vars/foundations/((foundation))/vars/nsx-t.yml
-          vars/foundations/((foundation))/vars/vars.yml
-          vars/foundations/vars/global.yml
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: pre-deploy-check
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/pre-deploy-check.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: apply-product-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: check-pending-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/check-pending-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
 
 - name: apply-product-changes
   serial: true
@@ -1007,8 +1057,6 @@ jobs:
         unpack: true
       passed:
       - stage-and-configure-tkgi
-      - stage-and-configure-tas
-      - stage-and-configure-nsx-t
       - stage-and-configure-healthwatch
       - stage-and-configure-mysql
       trigger: true
