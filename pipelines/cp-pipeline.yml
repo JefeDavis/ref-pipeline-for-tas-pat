@@ -1,0 +1,789 @@
+# The following line helps maintain current documentation at http://docs.pivotal.io.
+
+resources:
+- name: platform-automation-tasks
+  type: s3
+  source:
+    access_key_id: ((s3_access_key.username))
+    secret_access_key: ((s3_access_key.password))
+    region_name: ((s3_region_name))
+    bucket: ((s3_installation_bucket))
+    regexp: .*tasks-(.*).zip
+    endpoint: ((s3_endpoint))
+
+- name: platform-automation-image
+  type: s3
+  source:
+    access_key_id: ((s3_access_key.username))
+    secret_access_key: ((s3_access_key.password))
+    region_name: ((s3_region_name))
+    bucket: ((s3_installation_bucket))
+    regexp: .*image-(.*).tgz
+    endpoint: ((s3_endpoint))
+
+- name: installation
+  type: s3
+  source:
+    access_key_id: ((s3_access_key.username))
+    secret_access_key: ((s3_access_key.password))
+    region_name: ((s3_region_name))
+    bucket: ((s3_installation_bucket))
+    regexp: ((foundation))/((foundation))-installation-(.*).zip
+    endpoint: ((s3_endpoint))
+
+# VM state and foundation configuration
+# TODO: change over to installation bucket
+- name: state
+  type: s3
+  source:
+    access_key_id: ((s3_access_key.username))
+    bucket: ((s3_installation_bucket))
+    region_name: ((s3_region_name))
+    secret_access_key: ((s3_access_key.password))
+    regexp: ((foundation))/state/state-(.*).yml
+    initial_path: ((foundation))/state/state-0.0.0.yml
+    # versioned_file: ((foundation))/state/state.yml
+    initial_content_text: '{}'
+    # initial_version: 'empty-start'
+    endpoint: ((s3_endpoint))
+
+# configurations
+- name: configuration
+  type: git
+  source:
+    private_key: ((pipeline-repo-key.private_key))
+    uri: ((pipeline-repo-uri))
+    branch: master
+
+# triggers used to have jobs do something in a timely manner
+- name: one-time-trigger
+  type: time
+  source:
+    interval: 999999h
+
+- name: daily-trigger
+  type: time
+  source:
+    interval: 24h
+
+# This task is used in multiple jobs
+# The yaml anchor "*prepare-tasks-with-secrets" is used in its place
+prepare-tasks-with-secrets: &prepare-tasks-with-secrets
+  image: platform-automation-image
+  file: platform-automation-tasks/tasks/prepare-tasks-with-secrets.yml
+  input_mapping:
+    tasks: platform-automation-tasks
+    config: configuration
+    vars: configuration
+  params:
+    CONFIG_PATHS: config/foundations/config config/foundations/((foundation))/config
+    VARS_PATHS: |
+      vars/foundations/((foundation))/vars
+      vars/foundations/vars/global.yml
+  output_mapping:
+    tasks: platform-automation-tasks
+prepare-image: &prepare-image
+  image: platform-automation-image
+  file: platform-automation-tasks/tasks/prepare-image.yml
+  params:
+    CA_CERTS: ((trusted_certs))
+jobs:
+- name: test-platform-automation
+  serial: true
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+    - task: test-interpolate
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/test-interpolate.yml
+      params:
+        CONFIG_FILE: foundations/products/download-tas.yml
+        SKIP_MISSING: true
+      input_mapping:
+        config: configuration
+    - task: test
+      file: platform-automation-tasks/tasks/test.yml
+      image: platform-automation-image
+
+- name: install-opsman
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: one-time-trigger
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+    - get: state
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: download-opsman-image
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/products/download-opsman.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/versions.yml 
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: opsman-image
+  - task: create-vm
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/create-vm.yml
+    input_mapping:
+      image: opsman-image
+      config: configuration
+      vars: configuration
+    params:
+      OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
+      STATE_FILE: state-$timestamp.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/director.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+    ensure: &put-state
+      do:
+      - put: state
+        params:
+          file: generated-state/state-*.yml
+  - task: configure-authentication
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/configure-authentication.yml
+    attempts: 10
+    input_mapping:
+      env: configuration
+      config: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      AUTH_CONFIG_FILE: foundations/config/auth.yml
+      VARS_FILES: config/foundations/((foundation))/vars/vars.yml
+  - task: configure-opsman
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/configure-opsman.yml
+    input_mapping:
+      env: configuration
+      config: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/director.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+  - task: configure-director
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/configure-director.yml
+    input_mapping:
+      config: configuration
+      env: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      DIRECTOR_CONFIG_FILE: foundations/((foundation))/config/director.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/director.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+  - task: apply-director-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-director-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+      ENV_FILE: foundations/config/env.yml
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: export-installation
+  serial_groups: [ install ]
+  serial: true
+  plan:
+  - in_parallel:
+    - get: state
+      passed: [ install-opsman ]
+    - get: daily-trigger
+      trigger: true
+    - get: platform-automation-image
+      params:
+        unpack: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: revert-staged-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/revert-staged-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: upgrade-opsman
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: installation
+      passed: [ export-installation ]
+    - get: configuration
+    - get: state
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: download-opsman-image
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/products/download-opsman.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/versions.yml 
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: opsman-image
+  - task: upgrade-opsman
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upgrade-opsman.yml
+    input_mapping:
+      image: opsman-image
+      config: configuration
+      env: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
+      STATE_FILE: state-$timestamp.yml
+      INSTALLATION_FILE: ((foundation))-installation*.zip
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/director.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+    ensure: *put-state
+  - task: configure-director
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/configure-director.yml
+    input_mapping:
+      config: configuration
+      env: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      DIRECTOR_CONFIG_FILE: foundations/((foundation))/config/director.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/director.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+  - task: apply-director-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-director-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+
+- name: stage-configure-and-apply-file-integrity-monitoring
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      passed: [ "stage-configure-and-apply-antivirus-mirror" ]
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: download-file-integrity-monitoring
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/products/download-file-integrity-monitoring.yml
+      VARS_FILES: |
+        vars/foundations/vars/versions.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: file-integrity-monitoring-product
+      downloaded-stemcell: file-integrity-monitoring-stemcell
+  - task: upload-file-integrity-monitoring-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: file-integrity-monitoring-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: upload-file-integrity-monitoring-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: file-integrity-monitoring-stemcell
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: stage-configure-apply-file-integrity-monitoring
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-configure-apply.yml
+    input_mapping:
+      product: file-integrity-monitoring-product
+      env: configuration
+      config: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      CONFIG_FILE: foundations/((foundation))/config/file-integrity-monitoring.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/file-integrity-monitoring.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+
+- name: stage-configure-and-apply-harbor
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      passed: [ "stage-configure-and-apply-antivirus-mirror" ]
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: download-file-integrity-monitoring
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/products/download-harbor.yml
+      VARS_FILES: |
+        vars/foundations/vars/versions.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: harbor-product
+      downloaded-stemcell: harbor-stemcell
+  - task: upload-harbor-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: harbor-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: upload-harbor-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: harbor-stemcell
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: stage-configure-apply-harbor
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-configure-apply.yml
+    input_mapping:
+      product: harbor-product
+      env: configuration
+      config: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      CONFIG_FILE: foundations/((foundation))/config/harbor.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/harbor.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: stage-configure-and-apply-antivirus
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      passed: [ "stage-configure-and-apply-antivirus-mirror" ]
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: download-antivirus
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/products/download-antivirus.yml
+      VARS_FILES: |
+        vars/foundations/vars/versions.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: antivirus-product
+      downloaded-stemcell: antivirus-stemcell
+  - task: upload-antivirus-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: antivirus-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: upload-antivirus-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: antivirus-stemcell
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: stage-configure-apply-antivirus
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-configure-apply.yml
+    input_mapping:
+      product: antivirus-product
+      env: configuration
+      config: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      CONFIG_FILE: foundations/((foundation))/config/antivirus.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/antivirus.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: stage-configure-and-apply-antivirus-mirror
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      passed: [ "upgrade-opsman" ]
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: download-antivirus-mirror
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/download-product.yml
+    input_mapping:
+      config: configuration
+      vars: configuration
+    params:
+      CONFIG_FILE: foundations/products/download-antivirus-mirror.yml
+      VARS_FILES: |
+        vars/foundations/vars/versions.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      SOURCE: s3
+    output_mapping:
+      downloaded-product: antivirus-mirror-product
+      downloaded-stemcell: antivirus-mirror-stemcell
+  - task: upload-antivirus-mirror-product
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-product.yml
+    input_mapping:
+      product: antivirus-mirror-product
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: upload-antivirus-mirror-stemcell
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/upload-stemcell.yml
+    input_mapping:
+      env: configuration
+      stemcell: antivirus-mirror-stemcell
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: stage-configure-apply-antivirus-mirror
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/stage-configure-apply.yml
+    input_mapping:
+      product: antivirus-mirror-product
+      env: configuration
+      config: configuration
+      vars: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      CONFIG_FILE: foundations/((foundation))/config/antivirus-mirror.yml
+      VARS_FILES: |
+        vars/foundations/((foundation))/vars/antivirus-mirror.yml
+        vars/foundations/((foundation))/vars/vars.yml
+        vars/foundations/vars/global.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: apply-product-changes
+  serial: true
+  serial_groups: [ install ]
+  plan:
+  - in_parallel:
+    - get: platform-automation-image
+      params:
+        unpack: true
+      passed:
+      - stage-configure-and-apply-antivirus-mirror
+      - stage-configure-and-apply-antivirus
+      - stage-configure-and-apply-file-integrity-monitoring
+      - stage-configure-and-apply-harbor
+      trigger: true
+    - get: platform-automation-tasks
+      params:
+        unpack: true
+    - get: configuration
+  - task: prepare-tasks-with-secrets
+    <<: *prepare-tasks-with-secrets
+  - task: prepare-image
+    <<: *prepare-image
+  - task: pre-deploy-check
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/pre-deploy-check.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: apply-product-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/apply-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+  - task: check-pending-changes
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/check-pending-changes.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      ALLOW_PENDING_CHANGES: true
+  - task: export-installation
+    image: platform-automation-image
+    file: platform-automation-tasks/tasks/export-installation.yml
+    input_mapping:
+      env: configuration
+    params:
+      ENV_FILE: foundations/config/env.yml
+      INSTALLATION_FILE: ((foundation))-installation-$timestamp.zip
+  - put: installation
+    params:
+      file: installation/((foundation))-installation*.zip
+
+- name: expiring-certificates
+  serial: true
+  serial_groups: [ install ]
+  plan:
+    - in_parallel:
+      - get: daily-trigger
+        trigger: true
+      - get: platform-automation-image
+        params:
+          unpack: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+      - get: state
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: expiring-certificates
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/expiring-certificates.yml
+      input_mapping:
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+        EXPIRES_WITHIN: 6m
+
+- name: delete-installation
+  serial: true
+  serial_groups: [install]
+  plan:
+    - in_parallel:
+      - get: platform-automation-image
+        params:
+          unpack: true
+      - get: platform-automation-tasks
+        params:
+          unpack: true
+      - get: configuration
+      - get: state
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: delete-installation
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/delete-installation.yml
+      input_mapping:
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: delete-vm
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/delete-vm.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        OPSMAN_CONFIG_FILE: foundations/((foundation))/config/opsman.yml
+        STATE_FILE: state-$timestamp.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+      ensure:
+        do:
+        - put: state
+          params:
+            file: generated-state/state-*.yml
+# The previous line helps maintain current documentation at http://docs.pivotal.io.

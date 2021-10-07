@@ -1,0 +1,154 @@
+az-configuration:
+- name: ((availability_zone))1
+  iaas_configuration_name: ((vsphere_vcenter))
+  clusters:
+  - cluster: ((vsphere_cluster))
+    resource_pool: ((availability_zone))1
+- name: ((availability_zone))2
+  iaas_configuration_name: ((vsphere_vcenter))
+  clusters:
+  - cluster: ((vsphere_cluster))
+    resource_pool: ((availability_zone))2
+- name: ((availability_zone))3
+  iaas_configuration_name: ((vsphere_vcenter))
+  clusters:
+  - cluster: ((vsphere_cluster))
+    resource_pool: ((availability_zone))3
+iaas-configurations:
+- additional_cloud_properties: {}
+  bosh_disk_path: ((vsphere_disks_folder))
+  bosh_template_folder: ((vsphere_template_folder))
+  bosh_vm_folder: ((vsphere_vm_folder))
+  datacenter: ((vsphere_datacenter))
+  disk_type: thin
+  ephemeral_datastores_string: ((vsphere_datastore))
+  name: ((vsphere_vcenter))
+  nsx_address: ((nsxt_manager_fqdn))
+  nsx_ca_certificate: |
+    ((nsxt_cert.certificate))
+    ((nsxt_cert.ca))
+  nsx_mode: nsx-t
+  nsx_networking_enabled: true
+  nsx_password: ((nsxt_api_user.password))
+  nsx_t_auth_type: local_user
+  nsx_t_use_policy_api: false
+  nsx_username: ((nsxt_api_user.username))
+  persistent_datastore_clusters_string: ""
+  persistent_datastores_string: ((vsphere_datastore))
+  ssl_verification_enabled: false
+  vcenter_host: ((vsphere_vcenter))
+  vcenter_password: ((vcenter_user.password))
+  vcenter_username: ((vcenter_user.username))
+network-assignment:
+  network:
+    name: ((networks_infrastructure))
+  other_availability_zones: []
+  singleton_availability_zone:
+    name: ((availability_zone))1
+networks-configuration:
+  icmp_checks_enabled: true
+  networks:
+  - name: ((networks_infrastructure))
+    subnets:
+    - iaas_identifier: ((networks.infrastructure.name))
+      cidr: ((networks.infrastructure.cidr))
+      dns: ((domain_controllers))
+      gateway: ((networks.infrastructure.default_gateway))
+      reserved_ip_ranges: ((networks.infrastructure.reserved_ips))
+      availability_zone_names:
+      - ((availability_zone))1
+      - ((availability_zone))2
+      - ((availability_zone))3
+  - name: ((networks_deployment))
+    subnets:
+    - iaas_identifier: ((networks.deployment.name))
+      cidr: ((networks.deployment.cidr))
+      dns: ((domain_controllers))
+      gateway: ((networks.deployment.default_gateway))
+      reserved_ip_ranges: ((networks.deployment.reserved_ips))
+      availability_zone_names:
+      - ((availability_zone))1
+      - ((availability_zone))2
+      - ((availability_zone))3
+  - name: ((networks_services))
+    subnets:
+    - iaas_identifier: ((networks.services.name))
+      cidr: ((networks.services.cidr))
+      dns: ((domain_controllers))
+      gateway: ((networks.services.default_gateway))
+      reserved_ip_ranges: ((networks.services.reserved_ips))
+      availability_zone_names:
+      - ((availability_zone))1
+      - ((availability_zone))2
+      - ((availability_zone))3
+properties-configuration:
+  director_configuration:
+    blobstore_type: local
+    bosh_director_recreate_on_next_deploy: false
+    bosh_recreate_on_next_deploy: false
+    bosh_recreate_persistent_disks_on_next_deploy: false
+    database_type: internal
+    director_metrics_server_enabled: true
+    director_worker_count: 5
+    encryption:
+      keys: []
+      providers: []
+    hm_emailer_options:
+      enabled: false
+    hm_pager_duty_options:
+      enabled: false
+    identification_tags: {}
+    job_configuration_on_tmpfs: false
+    keep_unreachable_vms: false
+    local_blobstore_options:
+      enable_signed_urls: true
+    metrics_server_enabled: false
+    ntp_servers_string: ((domain_controllers))
+    post_deploy_enabled: true
+    resurrector_enabled: true
+    retry_bosh_deploys: false
+    skip_director_drain: false
+    system_metrics_runtime_enabled: true
+  dns_configuration:
+    excluded_recursors: []
+    handlers: []
+  security_configuration:
+    generate_vm_passwords: true
+    opsmanager_root_ca_trusted_certs: false
+    trusted_certificates: ((trusted_certs))
+  syslog_configuration:
+    enabled: false
+resource-configuration:
+  compilation:
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+    swap_as_percent_of_memory_size: automatic
+  director:
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+    persistent_disk:
+      size_mb: "153600"
+    swap_as_percent_of_memory_size: automatic
+vmextensions-configuration: []
+vmtypes-configuration: {}
+
