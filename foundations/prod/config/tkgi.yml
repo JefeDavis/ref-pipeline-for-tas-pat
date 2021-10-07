@@ -46,7 +46,7 @@ product-properties:
   .properties.network_selector.nsx.nodes-ip-block-id:
     value: ((nodes_ip_block_id))
   .properties.network_selector.nsx.nsx-t-ca-cert:
-    value: ((nsxt_cert.certificate))
+    value: ((nsxt_cert_chain))
   .properties.network_selector.nsx.nsx-t-host:
     value: ((nsxt_manager_fqdn))
   .properties.network_selector.nsx.nsx-t-insecure:
