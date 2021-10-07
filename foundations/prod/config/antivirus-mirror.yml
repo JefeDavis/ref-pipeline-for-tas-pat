@@ -1,0 +1,55 @@
+---
+product-name: p-antivirus-mirror
+product-properties:
+  .properties.log_destination:
+    value: syslog
+  .properties.mirror_port:
+    value: 6501
+  .properties.upstream_mirror:
+    selected_option: official_mirror
+    value: official_mirror
+  .properties.upstream_mirror.official_mirror.official_daily_db_check_frequency:
+    value: 12
+  .properties.use_proxy:
+    selected_option: disabled
+    value: disabled
+network-properties:
+  network:
+    name: ((networks_services))
+  other_availability_zones:
+  - name: ((availability_zone))1
+  - name: ((availability_zone))2
+  - name: ((availability_zone))3
+  singleton_availability_zone:
+    name: ((availability_zone))1
+resource-config:
+  antivirus-mirror:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    persistent_disk:
+      size_mb: automatic
+    swap_as_percent_of_memory_size: automatic
+syslog-properties:
+  address: null
+  custom_rsyslog_configuration: null
+  enabled: false
+  forward_debug_logs: false
+  permitted_peer: null
+  port: null
+  queue_size: null
+  ssl_ca_certificate: null
+  tls_enabled: false
+  transport_protocol: tcp
+
