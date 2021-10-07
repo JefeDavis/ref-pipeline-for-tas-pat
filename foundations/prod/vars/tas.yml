@@ -1,0 +1,16 @@
+---
+app_domain: apps.prod.uadsop.af.mil
+system_domain: sys.prod.uadsop.af.mil
+mysql_monitor_recipient_email: robert.mclean.14.ctr@us.af.mil
+cf_networking_search_domains: "uadsop.af.mil,area52.afnoapps.usaf.mil"
+poe_ssl_cert_name: prod.uadsop.af.mil
+nsxt_web_server_pools: 
+  - name: prod-web-pool
+    port: 443
+nsxt_gortr_ns_groups: 
+  - prod-gortr-svrs
+nsxt_diego_brain_server_pools: 
+  - name: prod-ssh-pool
+    port: 2222
+nsxt_diego_brain_ns_groups: 
+  - prod-diegobrain-svrs

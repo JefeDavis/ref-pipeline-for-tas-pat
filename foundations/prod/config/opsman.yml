@@ -1,0 +1,28 @@
+---
+opsman-configuration:
+  vsphere:
+    vm_name: ((ops_manager_vm_name))        # default - ops-manager-vm
+    vcenter:
+      ca_cert: ((opsman_cert.ca))                 # REQUIRED if insecure = 0 (secure)
+      datacenter: ((vsphere_datacenter))
+      datastore: ((vsphere_datastore))
+      folder: ((vsphere_vm_mgmt_folder))
+      url: ((vsphere_vcenter))
+      username: ((vcenter_user.username))
+      password: ((vcenter_user.password))
+      resource_pool: /((vsphere_datacenter))/host/((vsphere_cluster))/Resources/((availability_zone))1
+    cpu: 2                         # default - 1
+    memory: 8                      # default - 8 (GB)
+    disk_type: thin     # thin|thick
+    disk_size: 200
+    dns: ((domain_controllers))
+    gateway: ((infrastructure_gateway))
+    hostname: ((ops_manager_fqdn))
+    netmask: ((infrastructure_subnet_mask))
+    network: ((infrastructure_network_name))
+    ntp: ((domain_controllers))
+    private_ip: ((ops_manager_private_ip))
+    ssh_public_key: ((opsman_ssh_key.public_key))   # REQUIRED Ops Manager >= 2.6
+ssl-certificate:
+  certificate: ((opsman_cert.certificate))
+  private_key: ((opsman_cert.private_key))

@@ -1,0 +1,50 @@
+---
+product-name: p-antivirus
+product-properties:
+  .properties.action:
+    selected_option: notify
+    value: notify
+  .properties.cpu_limit:
+    value: 50
+  .properties.daily_db_check_frequency:
+    value: 12
+  .properties.database_connect_timeout:
+    value: 30
+  .properties.database_mirrors:
+    selected_option: tile_mirror
+    value: tile_mirror
+  .properties.database_mirrors.tile_mirror.port:
+    value: 6501
+  .properties.enforce_cpu_limit:
+    selected_option: disabled
+    value: disabled
+  .properties.exclude_paths:
+    value: /proc/,/sys/
+  .properties.memory_limit:
+    value: 1610612736
+  .properties.on_access:
+    value: false
+  .properties.scan_on_start:
+    value: false
+  .properties.schedule_interval:
+    selected_option: daily
+    value: daily
+  .properties.schedule_interval.daily.first_scheduled_scan_time:
+    value: '"00:00"'
+  .properties.schedule_interval.daily.last_scheduled_scan_time:
+    value: '"23:59"'
+  .properties.use_proxy:
+    selected_option: disabled
+    value: disabled
+syslog-properties:
+  address: null
+  custom_rsyslog_configuration: null
+  enabled: false
+  forward_debug_logs: false
+  permitted_peer: null
+  port: null
+  queue_size: null
+  ssl_ca_certificate: null
+  tls_enabled: false
+  transport_protocol: tcp
+
