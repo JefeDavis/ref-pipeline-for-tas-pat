@@ -1,20 +1,8 @@
 ---
 networks:
   infrastructure:
-    name: DEV-INFRASTRUCTURE
-    default_gateway: 172.17.1.1
+    name: CP-INFRASTRUCTURE
+    default_gateway: 172.16.1.1
     subnet_mask: 255.255.255.0
-    cidr:  172.17.1.0/24
-    reserved_ips: 172.17.1.0-172.17.1.10
-  deployment:
-    name: DEV-DEPLOYMENT
-    default_gateway: 172.17.2.1
-    subnet_mask: 255.255.255.0
-    cidr:  172.17.2.0/24
-    reserved_ips: 172.17.2.0-172.17.2.10
-  services:
-    name: DEV-SERVICES
-    default_gateway: 172.17.3.1
-    subnet_mask: 255.255.255.0
-    cidr:  172.17.3.0/24
-    reserved_ips: 172.17.3.0-172.17.3.10
+    cidr:  172.16.1.0/24
+    reserved_ips: 172.16.1.0-172.16.1.10
