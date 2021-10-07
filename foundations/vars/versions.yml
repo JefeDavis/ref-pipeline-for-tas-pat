@@ -3,26 +3,26 @@ versions:
   antivirus:
     download-regexp: ^2\.3\..*$
     dev: 2.3.10
-    prod:
+    prod: 2.3.10
     cp: 2.3.10
   antivirus-mirror:
     download-regexp: ^2\.3\..*$
     dev: 2.3.10
-    prod:
+    prod: 2.3.10
     cp: 2.3.10
   compliance-scanner:
     download-regexp: ^1\.2\..*$
     dev: 1.2.49
-    prod:
+    prod: 1.2.49
     cp: 1.2.49
   credhub-sb:
     download-regexp: ^1\.5\..*$
     dev: 1.5.1
-    prod:
+    prod: 1.5.1
   file-integrity-monitoring:
     download-regexp: ^2\.1\..*$
     dev: 2.1.5
-    prod:
+    prod: 2.1.5
     cp: 2.1.5
   harbor-registry:
     download-regexp: ^2\.3\..*$
@@ -30,49 +30,49 @@ versions:
   healthwatch:
     download-regexp: ^2\.1\..*$
     dev: 2.1.4
-    prod:
+    prod: 2.1.4
   metric-store:
     download-regexp: ^1\.5\..*$
     dev: 1.5.3
-    prod:
+    prod: 1.5.3
   metrics:
     download-regexp: ^2\.0\..*$
     dev: 2.0.7
-    prod:
+    prod: 2.0.7
   mysql:
     download-regexp: ^2\.10\..*$
     dev: 2.10.4
-    prod:
+    prod: 2.10.4
   nsx-t:
     download-regexp: ^3\.1\..*$
     dev: 3.1.2.4
-    prod:
+    prod: 3.1.2.4
   opsman:
     download-regexp: ^2\.10\..*$
     dev: 2.10.18
-    prod:
+    prod: 2.10.18
     cp: 2.10.18
   rabbitmq:
     download-regexp: ^2\.0\..*$
     dev: 2.0.6
-    prod:
+    prod: 2.0.6
   redis:
     download-regexp: ^2\.4\..*$
     dev: 2.4.3
-    prod:
+    prod: 2.4.3
   spring-cloud-services:
     download-regexp: ^3\.1\..*$
     dev: 3.1.22
-    prod:
+    prod: 3.1.22
   sso:
     download-regexp: ^1\.14\..*$
     dev: 1.14.3
-    prod:
+    prod: 1.14.3
   tas:
     download-regexp: ^2\.11\..*$
     dev: 2.11.7
-    prod:
+    prod: 2.11.7
   tkgi:
     download-regexp: ^1\.11\..*$
-    dev:  1.11.4
-    prod:
+    dev: 1.11.4
+    prod: 1.11.4
