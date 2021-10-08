@@ -4,6 +4,7 @@ ops_manager_fqdn: opsman.cp.uadsop.af.mil
 ops_manager_private_ip: 10.16.1.10 
 ops_manager_vm_name: cp-opsman
 availability_zone: CP-AZ
+vsphere_resource_pool: CP-INFRA
 vsphere_vm_folder: Control-Plane/cp_vms
 vsphere_vm_mgmt_folder: /USAFE-DSOP/vm/Control-Plane/cp_mgmt
 vsphere_template_folder: Control-Plane/cp_templates

@@ -3,7 +3,7 @@ az-configuration:
   iaas_configuration_name: ((vsphere_vcenter))
   clusters:
   - cluster: ((vsphere_cluster))
-    resource_pool: ((availability_zone))
+    resource_pool: ((vsphere_resource_pool))
 iaas-configurations:
 - additional_cloud_properties: {}
   bosh_disk_path: ((vsphere_disks_folder))
