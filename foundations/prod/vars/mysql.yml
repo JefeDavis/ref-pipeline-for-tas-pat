@@ -1,2 +1,2 @@
 ---
-s3_mysql_backup_bucket: mysql
+s3_mysql_backup_bucket: mysql/((foundation))
