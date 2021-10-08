@@ -926,6 +926,481 @@ jobs:
           vars/foundations/((foundation))/vars/healthwatch.yml
           vars/foundations/((foundation))/vars/vars.yml
           vars/foundations/vars/global.yml
+- name: stage-and-configure-sso
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-sso
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/products/download-sso.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: sso-product
+        downloaded-stemcell: sso-stemcell
+    - task: upload-and-stage-sso
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: sso-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-sso-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: sso-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-sso
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/sso.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/sso.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
+- name: stage-and-configure-metric-store
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-metric-store
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/products/download-metric-store.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: metric-store-product
+        downloaded-stemcell: metric-store-stemcell
+    - task: upload-and-stage-metric-store
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: metric-store-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-metric-store-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: metric-store-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-metric-store
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/metric-store.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/metric-store.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
+- name: stage-and-configure-metrics
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-metrics
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/products/download-metrics.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: metrics-product
+        downloaded-stemcell: metrics-stemcell
+    - task: upload-and-stage-metrics
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: metrics-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-metrics-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: metrics-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-metrics
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/metrics.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/metrics.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
+- name: stage-and-configure-credhub-sb
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-credhub-sb
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/products/download-credhub-sb.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: credhub-sb-product
+        downloaded-stemcell: credhub-sb-stemcell
+    - task: upload-and-stage-credhub-sb
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: credhub-sb-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-credhub-sb-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: credhub-sb-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-credhub-sb
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/credhub-sb.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/credhub-sb.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
+- name: stage-and-configure-redis
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-redis
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/products/download-redis.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: redis-product
+        downloaded-stemcell: redis-stemcell
+    - task: upload-and-stage-redis
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: redis-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-redis-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: redis-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-redis
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/redis.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/redis.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
+- name: stage-and-configure-rabbitmq
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-rabbitmq
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/products/download-rabbitmq.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: rabbitmq-product
+        downloaded-stemcell: rabbitmq-stemcell
+    - task: upload-and-stage-rabbitmq
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: rabbitmq-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-rabbitmq-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: rabbitmq-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-rabbitmq
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/rabbitmq.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/rabbitmq.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+
+- name: stage-and-configure-spring-cloud-services
+  serial: true
+  serial_groups: [ products ]
+  plan:
+    - in_parallel:
+        - get: platform-automation-image
+          params:
+            unpack: true
+          trigger: true
+          passed: 
+            - "stage-configure-and-apply-antivirus"
+            - "stage-configure-and-apply-compliance-scanner"
+            - "stage-configure-and-apply-file-integrity-monitoring"
+        - get: platform-automation-tasks
+          params:
+            unpack: true
+        - get: configuration
+    - task: prepare-tasks-with-secrets
+      <<: *prepare-tasks-with-secrets
+    - task: prepare-image
+      <<: *prepare-image
+    - task: download-spring-cloud-services
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/download-product.yml
+      input_mapping:
+        config: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/products/download-spring-cloud-services.yml
+        VARS_FILES: |
+          vars/foundations/vars/versions.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
+        SOURCE: s3
+      output_mapping:
+        downloaded-product: spring-cloud-services-product
+        downloaded-stemcell: spring-cloud-services-stemcell
+    - task: upload-and-stage-spring-cloud-services
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-and-stage-product.yml
+      input_mapping:
+        product: spring-cloud-services-product
+        env: configuration
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: upload-spring-cloud-services-stemcell
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/upload-stemcell.yml
+      input_mapping:
+        env: configuration
+        stemcell: spring-cloud-services-stemcell
+      params:
+        ENV_FILE: foundations/config/env.yml
+    - task: configure-spring-cloud-services
+      image: platform-automation-image
+      file: platform-automation-tasks/tasks/configure-product.yml
+      input_mapping:
+        config: configuration
+        env: configuration
+        vars: configuration
+      params:
+        CONFIG_FILE: foundations/((foundation))/config/spring-cloud-services.yml
+        ENV_FILE: foundations/config/env.yml
+        VARS_FILES: |
+          vars/foundations/((foundation))/vars/spring-cloud-services.yml
+          vars/foundations/((foundation))/vars/vars.yml
+          vars/foundations/vars/global.yml
 
 - name: stage-and-configure-tkgi
   serial: true
@@ -1061,6 +1536,13 @@ jobs:
       - stage-and-configure-tkgi
       - stage-and-configure-healthwatch
       - stage-and-configure-mysql
+      - stage-and-configure-sso
+      - stage-and-configure-metrics
+      - stage-and-configure-metric-store
+      - stage-and-configure-credhub-sb
+      - stage-and-configure-redis
+      - stage-and-configure-rabbitmq
+      - stage-and-configure-spring-cloud-services
       trigger: true
     - get: platform-automation-tasks
       params:
