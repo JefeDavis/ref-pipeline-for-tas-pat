@@ -55,13 +55,13 @@ product-properties:
     value: 1
 network-properties:
   network:
-    name: ((network_services))
+    name: ((networks_services))
   other_availability_zones:
   - name: ((availability_zone))3
   - name: ((availability_zone))2
   - name: ((availability_zone))1
   service_network:
-    name: ((network_services))
+    name: ((networks_services))
   singleton_availability_zone:
     name: ((availability_zone))1
 resource-config:
