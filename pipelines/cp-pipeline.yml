@@ -76,7 +76,7 @@ prepare-tasks-with-secrets: &prepare-tasks-with-secrets
     config: configuration
     vars: configuration
   params:
-    CONFIG_PATHS: config/foundations/config config/foundations/((foundation))/config
+    CONFIG_PATHS: config/foundations/config config/foundations/((foundation))/config config/foundations/products
     VARS_PATHS: |
       vars/foundations/((foundation))/vars
       vars/foundations/vars/global.yml
