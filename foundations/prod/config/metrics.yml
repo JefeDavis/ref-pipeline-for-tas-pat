@@ -19,11 +19,11 @@ network-properties:
   network:
     name: ((networks_services))
   other_availability_zones:
-  - name: DEV-AZ3
-  - name: DEV-AZ2
-  - name: DEV-AZ1
+  - name: ((availability_zone))3
+  - name: ((availability_zone))2
+  - name: ((availability_zone))1
   singleton_availability_zone:
-    name: DEV-AZ1
+    name: ((availability_zone))1
 resource-config:
   db-and-errand-runner:
     max_in_flight: 1
