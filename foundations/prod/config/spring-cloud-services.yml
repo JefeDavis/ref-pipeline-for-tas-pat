@@ -1,0 +1,67 @@
+---
+product-name: p_spring-cloud-services
+product-properties:
+  .properties.allow_paid_service_plans:
+    value: false
+  .properties.apply_open_security_group:
+    value: false
+  .properties.config_server_access:
+    value: global
+  .properties.config_server_credhub_enabled:
+    value: true
+  .properties.java_buildpack:
+    value: java_buildpack_offline
+  .properties.org:
+    value: p-spring-cloud-services
+  .properties.service_key_access:
+    value: false
+  .properties.service_registry_access:
+    value: global
+  .properties.space:
+    value: p-spring-cloud-services
+  .properties.status_change_timeout_minutes:
+    value: 30
+network-properties:
+  network:
+    name: ((networks_services))
+  other_availability_zones:
+  - name: ((availability_zone))3
+  - name: ((availability_zone))2
+  - name: ((availability_zone))1
+  singleton_availability_zone:
+    name: ((availability_zone))1
+resource-config:
+  spring-cloud-services:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    persistent_disk:
+      size_mb: automatic
+    swap_as_percent_of_memory_size: automatic
+errand-config:
+  destroy-brokers:
+    pre-delete-state: true
+  register-brokers:
+    post-deploy-state: true
+syslog-properties:
+  address: null
+  custom_rsyslog_configuration: null
+  enabled: false
+  forward_debug_logs: false
+  permitted_peer: null
+  port: null
+  queue_size: null
+  ssl_ca_certificate: null
+  tls_enabled: false
+  transport_protocol: tcp
