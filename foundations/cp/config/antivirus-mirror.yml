@@ -15,13 +15,11 @@ product-properties:
     value: disabled
 network-properties:
   network:
-    name: ((networks_services))
+    name: ((networks_infrastructure))
   other_availability_zones:
-  - name: ((availability_zone))1
-  - name: ((availability_zone))2
-  - name: ((availability_zone))3
+  - name: ((availability_zone))
   singleton_availability_zone:
-    name: ((availability_zone))1
+    name: ((availability_zone))
 resource-config:
   antivirus-mirror:
     max_in_flight: 1

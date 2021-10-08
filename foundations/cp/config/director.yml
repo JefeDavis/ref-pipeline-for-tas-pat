@@ -1,19 +1,9 @@
 az-configuration:
-- name: ((availability_zone))1
+- name: ((availability_zone))
   iaas_configuration_name: ((vsphere_vcenter))
   clusters:
   - cluster: ((vsphere_cluster))
-    resource_pool: ((availability_zone))1
-- name: ((availability_zone))2
-  iaas_configuration_name: ((vsphere_vcenter))
-  clusters:
-  - cluster: ((vsphere_cluster))
-    resource_pool: ((availability_zone))2
-- name: ((availability_zone))3
-  iaas_configuration_name: ((vsphere_vcenter))
-  clusters:
-  - cluster: ((vsphere_cluster))
-    resource_pool: ((availability_zone))3
+    resource_pool: ((availability_zone))
 iaas-configurations:
 - additional_cloud_properties: {}
   bosh_disk_path: ((vsphere_disks_folder))
@@ -44,7 +34,7 @@ network-assignment:
     name: ((networks_infrastructure))
   other_availability_zones: []
   singleton_availability_zone:
-    name: ((availability_zone))1
+    name: ((availability_zone))
 networks-configuration:
   icmp_checks_enabled: true
   networks:
@@ -56,31 +46,7 @@ networks-configuration:
       gateway: ((networks.infrastructure.default_gateway))
       reserved_ip_ranges: ((networks.infrastructure.reserved_ips))
       availability_zone_names:
-      - ((availability_zone))1
-      - ((availability_zone))2
-      - ((availability_zone))3
-  - name: ((networks_deployment))
-    subnets:
-    - iaas_identifier: ((networks.deployment.name))
-      cidr: ((networks.deployment.cidr))
-      dns: ((domain_controllers))
-      gateway: ((networks.deployment.default_gateway))
-      reserved_ip_ranges: ((networks.deployment.reserved_ips))
-      availability_zone_names:
-      - ((availability_zone))1
-      - ((availability_zone))2
-      - ((availability_zone))3
-  - name: ((networks_services))
-    subnets:
-    - iaas_identifier: ((networks.services.name))
-      cidr: ((networks.services.cidr))
-      dns: ((domain_controllers))
-      gateway: ((networks.services.default_gateway))
-      reserved_ip_ranges: ((networks.services.reserved_ips))
-      availability_zone_names:
-      - ((availability_zone))1
-      - ((availability_zone))2
-      - ((availability_zone))3
+      - ((availability_zone))
 properties-configuration:
   director_configuration:
     blobstore_type: local

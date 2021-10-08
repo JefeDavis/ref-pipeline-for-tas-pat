@@ -40,13 +40,11 @@ product-properties:
     value: 514
 network-properties:
   network:
-    name: ((networks_services))
+    name: ((networks_infrastructure))
   other_availability_zones:
-  - name: ((availability_zone))1
-  - name: ((availability_zone))2
-  - name: ((availability_zone))3
+  - name: ((availability_zone))
   singleton_availability_zone:
-    name: ((availability_zone))1
+    name: ((availability_zone))
 resource-config:
   oscap_store:
     max_in_flight: 1

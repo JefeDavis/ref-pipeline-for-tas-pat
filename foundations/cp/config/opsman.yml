@@ -10,7 +10,7 @@ opsman-configuration:
       url: ((vsphere_vcenter))
       username: ((vcenter_user.username))
       password: ((vcenter_user.password))
-      resource_pool: /((vsphere_datacenter))/host/((vsphere_cluster))/Resources/((availability_zone))1
+      resource_pool: /((vsphere_datacenter))/host/((vsphere_cluster))/Resources/((availability_zone))
     cpu: 2                         # default - 1
     memory: 8                      # default - 8 (GB)
     disk_type: thin     # thin|thick
