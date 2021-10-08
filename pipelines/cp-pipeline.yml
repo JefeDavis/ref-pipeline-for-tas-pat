@@ -673,7 +673,7 @@ jobs:
       - stage-configure-and-apply-antivirus-mirror
       - stage-configure-and-apply-antivirus
       - stage-configure-and-apply-file-integrity-monitoring
-      - stage-configure-and-apply-harbor
+      - stage-configure-and-apply-harbor-registry
       trigger: true
     - get: platform-automation-tasks
       params:
