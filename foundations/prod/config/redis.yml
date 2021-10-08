@@ -1,0 +1,131 @@
+---
+product-name: p-redis
+product-properties:
+  .cf-redis-broker.lua_scripting_enabled:
+    value: false
+  .cf-redis-broker.redis_maxmemory:
+    value: 512MB
+  .cf-redis-broker.service_instance_limit:
+    value: 5
+  .properties.backups_selector:
+    selected_option: disabled
+    value: No Backups
+  .properties.canary_org_space_selector:
+    selected_option: inactive
+    value: "No"
+  .properties.metrics_polling_interval:
+    value: 30
+  .properties.on_demand_secure_bindings_selector:
+    selected_option: disabled
+    value: "No"
+  .properties.plan_collection:
+    value:
+    - az_multi_select:
+      - ((availability_zone))1
+      - ((availability_zone))2
+      - ((availability_zone))3
+      cf_service_access: enable
+      configured_plan_id: null
+      description: This plan provides a test on-demand Redis instance, tailored for
+        caching use-cases with persistence to disk enabled
+      disk_size: null
+      instance_limit: 20
+      lua_scripting: false
+      maxclients: 1000
+      name: on-demand-cache
+      tcp_keepalive: 60
+      timeout: 3600
+      vm_type: null
+  .properties.tls_enable_selector:
+    selected_option: active
+    value: Optional - Developers may configure their apps to use TLS.
+  .properties.tls_enable_selector.active.tls_versions:
+    value:
+    - tlsv1.1
+    - tlsv1.2
+  .redis-on-demand-broker.enable_create_swap_delete:
+    value: false
+  .redis-on-demand-broker.maximum_parallel_upgrades:
+    value: 1
+  .redis-on-demand-broker.service_instance_limit:
+    value: 20
+  .redis-on-demand-broker.service_instance_sharing:
+    value: false
+  .redis-on-demand-broker.upgrade_canary_number:
+    value: 1
+network-properties:
+  network:
+    name: ((network_services))
+  other_availability_zones:
+  - name: ((availability_zone))3
+  - name: ((availability_zone))2
+  - name: ((availability_zone))1
+  service_network:
+    name: ((network_services))
+  singleton_availability_zone:
+    name: ((availability_zone))1
+resource-config:
+  cf-redis-broker:
+    max_in_flight: 100%
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    persistent_disk:
+      size_mb: automatic
+    swap_as_percent_of_memory_size: automatic
+  redis-on-demand-broker:
+    max_in_flight: 100%
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    swap_as_percent_of_memory_size: automatic
+errand-config:
+  broker-deregistrar:
+    pre-delete-state: true
+  broker-registrar:
+    post-deploy-state: true
+  delete-all-service-instances-and-deregister-broker:
+    pre-delete-state: true
+  on-demand-broker-smoke-tests:
+    post-deploy-state: true
+  orphan-deployments:
+    post-deploy-state: false
+  recreate-all-service-instances:
+    post-deploy-state: false
+  register-broker:
+    post-deploy-state: true
+  smoke-tests:
+    post-deploy-state: true
+  upgrade-all-service-instances:
+    post-deploy-state: true
+syslog-properties:
+  address: null
+  custom_rsyslog_configuration: null
+  enabled: false
+  forward_debug_logs: false
+  permitted_peer: null
+  port: null
+  queue_size: null
+  ssl_ca_certificate: null
+  tls_enabled: false
+  transport_protocol: tcp
