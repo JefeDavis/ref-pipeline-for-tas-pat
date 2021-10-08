@@ -1,0 +1,53 @@
+---
+
+product-name: Pivotal_Single_Sign-On_Service
+product-properties:
+  .properties.buildpack:
+    value: java_buildpack_offline
+network-properties:
+  network:
+    name: ((networks_services))
+  other_availability_zones:
+  - name: ((availability_zone))3
+  - name: ((availability_zone))2
+  - name: ((availability_zone))1
+  singleton_availability_zone:
+    name: ((availability_zone))1
+resource-config:
+  deploy-service-broker:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    swap_as_percent_of_memory_size: automatic
+  destroy-broker:
+    max_in_flight: 1
+    additional_networks: []
+    additional_vm_extensions: []
+    instance_type:
+      id: automatic
+    instances: automatic
+    nsx:
+      lbs: []
+      security_groups: []
+    nsxt:
+      lb:
+        server_pools: []
+      ns_groups: []
+      vif_type: null
+    swap_as_percent_of_memory_size: automatic
+errand-config:
+  deploy-service-broker:
+    post-deploy-state: true
+  destroy-broker:
+    pre-delete-state: true
