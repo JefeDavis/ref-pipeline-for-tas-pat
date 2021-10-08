@@ -427,7 +427,7 @@ jobs:
       file: installation/((foundation))-installation*.zip
 
 
-- name: stage-configure-and-apply-harbor
+- name: stage-configure-and-apply-harbor-registry
   serial: true
   serial_groups: [ install ]
   plan:
@@ -452,44 +452,44 @@ jobs:
       config: configuration
       vars: configuration
     params:
-      CONFIG_FILE: foundations/products/download-harbor.yml
+      CONFIG_FILE: foundations/products/download-harbor-registry.yml
       VARS_FILES: |
         vars/foundations/vars/versions.yml
         vars/foundations/((foundation))/vars/vars.yml
         vars/foundations/vars/global.yml
       SOURCE: s3
     output_mapping:
-      downloaded-product: harbor-product
-      downloaded-stemcell: harbor-stemcell
-  - task: upload-harbor-product
+      downloaded-product: harbor-registry-product
+      downloaded-stemcell: harbor-registry-stemcell
+  - task: upload-harbor-registry-product
     image: platform-automation-image
     file: platform-automation-tasks/tasks/upload-product.yml
     input_mapping:
-      product: harbor-product
+      product: harbor-registry-product
       env: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-  - task: upload-harbor-stemcell
+  - task: upload-harbor-registry-stemcell
     image: platform-automation-image
     file: platform-automation-tasks/tasks/upload-stemcell.yml
     input_mapping:
       env: configuration
-      stemcell: harbor-stemcell
+      stemcell: harbor-registry-stemcell
     params:
       ENV_FILE: foundations/config/env.yml
-  - task: stage-configure-apply-harbor
+  - task: stage-configure-apply-harbor-registry
     image: platform-automation-image
     file: platform-automation-tasks/tasks/stage-configure-apply.yml
     input_mapping:
-      product: harbor-product
+      product: harbor-registry-product
       env: configuration
       config: configuration
       vars: configuration
     params:
       ENV_FILE: foundations/config/env.yml
-      CONFIG_FILE: foundations/((foundation))/config/harbor.yml
+      CONFIG_FILE: foundations/((foundation))/config/harbor-registry.yml
       VARS_FILES: |
-        vars/foundations/((foundation))/vars/harbor.yml
+        vars/foundations/((foundation))/vars/harbor-registry.yml
         vars/foundations/((foundation))/vars/vars.yml
         vars/foundations/vars/global.yml
       ALLOW_PENDING_CHANGES: true
