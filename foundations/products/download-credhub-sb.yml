@@ -2,7 +2,7 @@
 pivnet-product-slug: credhub-service-broker
 
 file-glob: "credhub-service-broker-*.pivotal"
-product-version: ((versions.credhub.((foundation))))
+product-version: ((versions.credhub-sb.((foundation))))
 stemcell-iaas: vsphere
 
 s3-access-key-id: ((s3_access_key.username))
