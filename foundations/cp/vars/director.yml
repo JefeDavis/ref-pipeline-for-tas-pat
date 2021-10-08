@@ -2,7 +2,7 @@
 networks:
   infrastructure:
     name: CP-INFRASTRUCTURE
-    default_gateway: 172.16.1.1
+    default_gateway: 10.16.1.1
     subnet_mask: 255.255.255.0
-    cidr:  172.16.1.0/24
-    reserved_ips: 172.16.1.0-172.16.1.10
+    cidr:  10.16.1.0/24
+    reserved_ips: 10.16.1.0-10.16.1.10

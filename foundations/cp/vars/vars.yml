@@ -1,13 +1,13 @@
 ---
 foundation: cp
 ops_manager_fqdn: opsman.cp.uadsop.af.mil
-ops_manager_private_ip: 172.16.1.10 
+ops_manager_private_ip: 10.16.1.10 
 ops_manager_vm_name: cp-opsman
 availability_zone: CP-AZ
 vsphere_vm_folder: Control-Plane/cp_vms
 vsphere_vm_mgmt_folder: /USAFE-DSOP/vm/Control-Plane/cp_mgmt
 vsphere_template_folder: Control-Plane/cp_templates
 vsphere_disks_folder: cp_disks
-infrastructure_gateway: 172.16.1.1
+infrastructure_gateway: 10.16.1.1
 infrastructure_subnet_mask: 255.255.255.0
 infrastructure_network_name: CP-INFRASTRUCTURE

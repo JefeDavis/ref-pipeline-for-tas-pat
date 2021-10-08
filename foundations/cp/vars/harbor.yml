@@ -1,2 +1,2 @@
 ---
-harbor_static_ip: 172.16.1.103
+harbor_static_ip: 10.16.1.103

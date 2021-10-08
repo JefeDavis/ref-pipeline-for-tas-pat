@@ -2,19 +2,19 @@
 networks:
   infrastructure:
     name: PROD-INFRASTRUCTURE
-    default_gateway: 172.18.1.1
+    default_gateway: 10.18.1.1
     subnet_mask: 255.255.255.0
-    cidr:  172.18.1.0/24
-    reserved_ips: 172.18.1.0-172.18.1.10
+    cidr:  10.18.1.0/24
+    reserved_ips: 10.18.1.0-10.18.1.10
   deployment:
     name: PROD-DEPLOYMENT
-    default_gateway: 172.18.2.1
+    default_gateway: 10.18.2.1
     subnet_mask: 255.255.255.0
-    cidr:  172.18.2.0/24
-    reserved_ips: 172.18.2.0-172.18.2.10
+    cidr:  10.18.2.0/24
+    reserved_ips: 10.18.2.0-10.18.2.10
   services:
     name: PROD-SERVICES
-    default_gateway: 172.18.3.1
+    default_gateway: 10.18.3.1
     subnet_mask: 255.255.255.0
-    cidr:  172.18.3.0/24
-    reserved_ips: 172.18.3.0-172.18.3.10
+    cidr:  10.18.3.0/24
+    reserved_ips: 10.18.3.0-10.18.3.10

@@ -1,13 +1,13 @@
 ---
 foundation: prod
 ops_manager_fqdn: opsman.prod.uadsop.af.mil
-ops_manager_private_ip: 172.18.1.10 
+ops_manager_private_ip: 10.18.1.10 
 ops_manager_vm_name: prod-opsman
 availability_zone: PROD-AZ
 vsphere_vm_folder: Prod/prod_vms
 vsphere_vm_mgmt_folder: /USAFE-DSOP/vm/Prod/prod_mgmt
 vsphere_template_folder: Prod/prod_templates
 vsphere_disks_folder: prod_disks
-infrastructure_gateway: 172.18.1.1
+infrastructure_gateway: 10.18.1.1
 infrastructure_subnet_mask: 255.255.255.0
 infrastructure_network_name: PROD-INFRASTRUCTURE
